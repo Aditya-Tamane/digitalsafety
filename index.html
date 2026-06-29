@@ -1,0 +1,3153 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Digital Safety — Live Audience Console</title>
+<style>
+  :root{
+    --bg:#070d12; --ink:#0c151c; --panel:#101c24; --line:#1f3340; --line-soft:#162531;
+    --text:#eef4f6; --muted:#8aa1ad; --faint:#5d7682;
+    --beacon:#ffb02e; --safe:#3ddc97; --safe-d:#0f2c24; --scam:#ff6a5a; --scam-d:#33150f;
+    --live:#3ddc97; --demo:#ffb02e;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5;min-height:100vh}
+  ::selection{background:var(--beacon);color:#1a1100}
+  button{font-family:inherit;cursor:pointer}
+  input{font-family:inherit}
+  .mono{font-family:var(--mono)}
+  .hidden{display:none!important}
+
+  /* ---------- top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;
+    padding:12px clamp(14px,3vw,28px);background:rgba(7,13,18,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+  .tb-btn{background:none;border:1px solid var(--line);color:var(--muted);width:38px;height:38px;border-radius:11px;font-size:16px;display:grid;place-items:center;transition:.15s}
+  .tb-btn:hover{border-color:var(--beacon);color:var(--text)}
+  .tb-btn[disabled]{opacity:.3;pointer-events:none}
+  .tb-title{font-weight:700;font-size:15px;letter-spacing:-.01em}
+  .tb-sub{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.08em}
+  .tb-spacer{flex:1}
+  .tb-pill{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;
+    padding:7px 12px;border-radius:999px;border:1px solid var(--line)}
+  .tb-pill .dot{width:8px;height:8px;border-radius:50%}
+  .tb-pill.live{color:var(--live);border-color:#1f4a3c;background:#10271f}
+  .tb-pill.live .dot{background:var(--live);animation:blink 1.4s infinite}
+  .tb-pill.demo{color:var(--demo);border-color:#4a3a18;background:#241a09}
+  .tb-pill.demo .dot{background:var(--demo)}
+  .tb-act{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:8px 13px;border-radius:11px;font-size:13px;font-weight:600;transition:.15s}
+  .tb-act:hover{border-color:var(--beacon);color:var(--text)}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px,3vw,28px) 70px}
+
+  /* ---------- home ---------- */
+  .hero{padding:24px 0 8px}
+  .hero .kick{font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
+  .hero h1{font-size:clamp(32px,6vw,58px);line-height:1.02;margin:14px 0 0;font-weight:800;letter-spacing:-.025em}
+  .hero h1 .g{color:var(--beacon)}
+  .hero p{max-width:64ch;color:var(--muted);font-size:clamp(15px,1.6vw,18px);margin:16px 0 0}
+  .howto{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+  .howto .pill{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line-soft);border-radius:13px;padding:11px 15px;font-size:13.5px;color:var(--muted)}
+  .howto .pill b{color:var(--text)}
+  .howto .pill .s{font-family:var(--mono);color:var(--beacon);font-weight:700}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px;margin-top:28px}
+  .card{position:relative;text-align:left;background:linear-gradient(160deg,var(--panel),#0a1218);
+    border:1px solid var(--line-soft);border-radius:18px;padding:20px;color:var(--text);
+    transition:transform .16s,border-color .16s,box-shadow .16s;display:flex;flex-direction:column;gap:9px;min-height:178px;overflow:hidden}
+  .card::after{content:"";position:absolute;inset:0;background:radial-gradient(220px 120px at 90% -20%,#ffb02e18,transparent);opacity:0;transition:.2s}
+  .card:hover{transform:translateY(-3px);border-color:var(--beacon);box-shadow:0 20px 50px -30px #000}
+  .card:hover::after{opacity:1}
+  .card:focus-visible{outline:2px solid var(--beacon);outline-offset:3px}
+  .card .n{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--beacon);line-height:1}
+  .card .play{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--safe);border:1px solid #1f4a3c;background:#10271f;padding:4px 9px;border-radius:999px}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start}
+  .card h3{font-size:17px;font-weight:700;margin:0;line-height:1.2}
+  .card p{font-size:13px;color:var(--muted);margin:0;flex:1}
+
+  /* ---------- stage ---------- */
+  .station-strip{display:flex;align-items:baseline;gap:12px;margin-top:6px}
+  .station-strip .num{font-family:var(--mono);color:var(--beacon);font-size:13px;letter-spacing:.2em}
+  .stage{position:relative;border-radius:24px;min-height:min(74vh,620px);
+    background:radial-gradient(700px 460px at 50% 8%,#13242e,#080f14 70%);
+    border:1px solid var(--line-soft);display:flex;align-items:flex-start;justify-content:center;
+    padding:30px 18px;overflow:hidden;margin-top:14px}
+  .stage::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 280px at 50% 0%,#ffb02e10,transparent);pointer-events:none}
+  .stage>*{position:relative;width:100%}
+
+  /* ---------- presenter live layout ---------- */
+  .pres{display:grid;grid-template-columns:1fr;gap:22px;width:100%;max-width:920px;margin:0 auto;align-items:start}
+  @media(min-width:760px){.pres.two{grid-template-columns:330px 1fr}}
+  .joinpanel{background:rgba(16,28,36,.7);border:1px solid var(--line-soft);border-radius:20px;padding:22px;text-align:center}
+  .joinpanel .lab{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:14px}
+  .qrbox{background:#fff;padding:14px;border-radius:16px;display:inline-block;line-height:0;min-height:40px}
+  .qrnote{background:#0a141a;border:1px dashed var(--line);border-radius:16px;padding:28px 18px;color:var(--demo);font-size:13px;font-family:var(--mono);line-height:1.5}
+  .joincode{font-family:var(--mono);font-weight:800;font-size:clamp(30px,7vw,46px);letter-spacing:.18em;color:var(--beacon);margin-top:16px;line-height:1}
+  .joinurl{font-family:var(--mono);font-size:12px;color:var(--muted);word-break:break-all;margin-top:8px}
+  .joinurl b{color:var(--text)}
+
+  .livepanel{background:rgba(16,28,36,.55);border:1px solid var(--line-soft);border-radius:20px;padding:22px;min-height:260px;display:flex;flex-direction:column}
+  .livehead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px}
+  .livehead .ttl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .counter{font-family:var(--mono);font-weight:800;font-size:clamp(40px,9vw,72px);line-height:1;letter-spacing:-.02em;color:var(--beacon)}
+  .counter.safe{color:var(--safe)} .counter.scam{color:var(--scam)}
+  .counterlab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+
+  .feed{margin-top:14px;display:flex;flex-direction:column;gap:7px;max-height:330px;overflow-y:auto}
+  .feedrow{display:flex;align-items:center;gap:12px;background:#0a141a;border:1px solid var(--line-soft);border-radius:12px;padding:11px 14px;animation:slidein .35s cubic-bezier(.2,1,.3,1)}
+  @keyframes slidein{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  .feedrow .av{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:15px;background:#14242e;color:var(--scam)}
+  .feedrow .main{flex:1;min-width:0}
+  .feedrow .main .a{font-family:var(--mono);font-size:15px;word-break:break-all}
+  .feedrow .main .b{font-size:12px;color:var(--faint);margin-top:2px}
+  .feedrow .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--scam);flex:none}
+  .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--faint);gap:10px;padding:24px}
+  .empty .big{font-size:34px}
+  .waitdots::after{content:"";animation:dots 1.4s steps(4,end) infinite}
+  @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+  /* vote bars */
+  .votebars{display:flex;flex-direction:column;gap:16px;margin-top:18px}
+  .vbar{}
+  .vbar .vt{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;margin-bottom:7px}
+  .vbar .track{height:34px;border-radius:10px;background:#0a141a;border:1px solid var(--line-soft);overflow:hidden}
+  .vbar .fillb{height:100%;width:0;transition:width .4s cubic-bezier(.2,.9,.3,1);display:flex;align-items:center;padding-left:12px;font-family:var(--mono);font-weight:700;color:#06231a}
+  .vbar.safe .fillb{background:var(--safe)} .vbar.scam .fillb{background:var(--scam);color:#2a0d08}
+  .msgcard{background:#0a141a;border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:6px}
+  .msgcard .from{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  .msgcard .bub{background:#1b2c36;border-radius:16px;border-bottom-left-radius:5px;padding:14px 16px;font-size:15px}
+  .flags{margin-top:12px}
+  .flagline{font-size:13px;color:var(--muted);margin-top:6px}
+
+  /* leaderboard */
+  .board{display:flex;flex-direction:column;gap:8px;margin-top:14px;max-height:360px;overflow-y:auto}
+  .brow{display:flex;align-items:center;gap:13px;background:#0a141a;border:1px solid var(--line-soft);border-radius:12px;padding:12px 14px;animation:slidein .35s}
+  .brow .rk{font-family:var(--mono);font-size:13px;color:var(--faint);width:24px;flex:none;text-align:center}
+  .brow .pw{font-family:var(--mono);font-size:16px;flex:1;min-width:0;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brow .yr{font-family:var(--mono);font-size:13px;flex:none;text-align:right}
+  .brow.weak{border-color:var(--scam);background:var(--scam-d)} .brow.weak .yr{color:var(--scam)}
+  .brow.strong{border-color:var(--safe)} .brow.strong .yr{color:var(--safe)}
+
+  /* generic card + controls */
+  .scard{width:100%;max-width:560px;background:rgba(16,28,36,.7);border:1px solid var(--line-soft);border-radius:20px;padding:26px;margin:0 auto}
+  .scard .lab{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);text-align:center;margin-bottom:16px}
+  .btn{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;transition:.15s}
+  .btn:hover{border-color:var(--beacon)}
+  .btn.primary{background:var(--beacon);color:#1c1300;border-color:var(--beacon);font-weight:800}
+  .btn.danger{background:var(--scam);color:#2a0d08;border-color:var(--scam);font-weight:800}
+  .btn.ghost{background:none}
+  .btn[disabled]{opacity:.4;pointer-events:none}
+  .ctrlrow{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+  .verdict{font-family:var(--mono);font-weight:800;letter-spacing:.12em;font-size:18px;text-align:center;margin-top:16px}
+  .verdict.g{color:var(--safe)} .verdict.r{color:var(--scam)}
+  .subtext{color:var(--muted);font-size:13.5px;text-align:center;margin-top:12px;padding:0 6px}
+  .field{width:100%;background:#0a141a;border:1px solid var(--line);border-radius:12px;color:var(--text);font-family:var(--mono);font-size:15px;padding:13px 14px}
+  .field:focus{outline:2px solid var(--beacon);border-color:var(--beacon)}
+
+  /* ---------- slide-over (notes + setup) ---------- */
+  .scrim{position:fixed;inset:0;background:#000a;backdrop-filter:blur(3px);z-index:60;opacity:0;pointer-events:none;transition:.2s}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;top:0;right:0;bottom:0;width:min(440px,94vw);background:var(--ink);border-left:1px solid var(--line);z-index:61;
+    transform:translateX(100%);transition:transform .26s cubic-bezier(.2,.9,.3,1);overflow-y:auto;padding:24px}
+  .sheet.open{transform:none}
+  .sheet .x{position:absolute;top:18px;right:18px;background:none;border:1px solid var(--line);color:var(--muted);width:34px;height:34px;border-radius:9px;font-size:16px}
+  .sheet h3{margin:0 40px 4px 0;font-size:18px}
+  .sheet h4{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--beacon);margin:24px 0 10px}
+  .sheet ol{margin:0;padding-left:18px} .sheet ol li{margin:7px 0;font-size:14px}
+  .sheet ol li small{display:block;color:var(--muted);font-size:12.5px}
+  .sheet p{font-size:13.5px;color:var(--muted);margin:8px 0}
+  .sheet code{font-family:var(--mono);font-size:12px;background:#0a141a;border:1px solid var(--line-soft);padding:2px 6px;border-radius:6px;color:var(--text);word-break:break-all}
+  .ncall{border-radius:12px;padding:14px;font-size:14px;margin-top:6px}
+  .ncall.f{background:var(--safe-d);border:1px solid #1f4a3c}.ncall.f .l{color:var(--safe)}
+  .ncall.s{background:var(--scam-d);border:1px solid #5a2b22}.ncall.s .l{color:var(--scam)}
+  .ncall .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:5px}
+  .setlabel{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 7px}
+  .savebtn{width:100%;margin-top:18px;padding:14px;border-radius:13px;border:none;background:var(--beacon);color:#1c1300;font-weight:800;font-size:15px}
+  .statusline{font-family:var(--mono);font-size:12px;padding:10px 12px;border-radius:10px;margin-top:14px;text-align:center}
+  .statusline.ok{background:#10271f;color:var(--live);border:1px solid #1f4a3c}
+  .statusline.no{background:#241a09;color:var(--demo);border:1px solid #4a3a18}
+
+  /* ---------- participant (phone) view ---------- */
+  .pv{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 0}
+  .pv-head{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--muted)}
+  .pv-head .lk{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,#2563a8,#1b3f6e);display:grid;place-items:center;font-size:12px;color:#fff}
+  .pv-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:26px 22px 40px;max-width:480px;width:100%;margin:0 auto}
+  .pv-body h2{font-size:26px;font-weight:800;margin:0 0 6px;line-height:1.15}
+  .pv-body p.sub{color:var(--muted);font-size:15px;margin:0 0 22px}
+  .pv-field{width:100%;background:#0a141a;border:1px solid var(--line);border-radius:14px;color:var(--text);font-family:var(--mono);font-size:18px;padding:16px;margin-top:8px}
+  .pv-field:focus{outline:2px solid var(--beacon);border-color:var(--beacon)}
+  .pv-flabel{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 0}
+  .pv-btn{width:100%;padding:17px;border-radius:15px;border:none;font-weight:800;font-size:17px;margin-top:22px}
+  .pv-btn.bait{background:#5a3df0;color:#fff}
+  .pv-btn.go{background:var(--beacon);color:#1c1300}
+  .pv-vote{display:flex;flex-direction:column;gap:14px;margin-top:10px}
+  .pv-vote button{width:100%;padding:22px;border-radius:16px;border:2px solid var(--line);background:#0a141a;color:var(--text);font-size:19px;font-weight:800;transition:.12s}
+  .pv-vote button.safe.on{border-color:var(--safe);background:var(--safe-d);color:var(--safe)}
+  .pv-vote button.scam.on{border-color:var(--scam);background:var(--scam-d);color:var(--scam)}
+  .pv-reveal{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 26px}
+  .pv-reveal .ic{font-size:74px;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  .pv-reveal h1{font-size:34px;font-weight:800;margin:10px 0 2px}
+  .pv-reveal h1.r{color:var(--scam)} .pv-reveal h1.g{color:var(--safe)}
+  .pv-reveal .big2{font-size:20px;font-weight:700;color:var(--text)}
+  .pv-reveal p{color:var(--muted);font-size:15px;margin-top:18px;line-height:1.6;max-width:34ch}
+  .pv-reveal p b{color:var(--text)}
+  .pv-wait{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:40px 26px;color:var(--muted)}
+  .pv-wait .chk{width:78px;height:78px;border-radius:50%;background:#103026;border:2px solid var(--safe);color:var(--safe);display:grid;place-items:center;font-size:38px;animation:pop .4s}
+  .pv-wait h2{color:var(--text);font-size:23px;margin:0}
+  .pv-meter{height:14px;border-radius:999px;background:#0a141a;border:1px solid var(--line-soft);overflow:hidden;margin:18px 0 8px}
+  .pv-meter .f{height:100%;width:0;transition:width .3s,background .3s;border-radius:999px}
+  .pv-crack{font-family:var(--mono);font-size:clamp(24px,8vw,40px);font-weight:800;text-align:center;line-height:1.1;margin-top:6px}
+  .pv-cracklab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:center;margin-top:6px}
+  .pv-note{font-size:12.5px;color:var(--faint);text-align:center;margin-top:16px}
+  .pv-bait{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 26px;background:linear-gradient(180deg,#191235,#0d0a1c);min-height:100dvh}
+  .pv-bait .gift{font-size:60px}
+  .pv-bait h1{font-size:28px;font-weight:800;margin:14px 0 4px}
+  .pv-bait p{color:#b9b2d6;margin:0 0 4px}
+
+  .spinner{width:38px;height:38px;border:3px solid #ffffff20;border-top-color:var(--beacon);border-radius:50%;animation:spin .8s linear infinite;margin:auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes blink{50%{opacity:.35}}
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="root"></div>
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="notes"></aside>
+<aside class="sheet" id="setup"></aside>
+
+<script src="config.js"></script>
+<script>
+/* QR: qrcode-generator (c) Kazuhiko Arase, MIT */
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+      define([], factory);
+  } else if (typeof exports === 'object') {
+      module.exports = factory();
+  }
+}(function () {
+    return qrcode;
+}));
+
+</script>
+<script>
+/* ============================================================
+   Digital Safety — Live Audience Console
+   All 5 demos are multi-device: presenter screen + real phones.
+   Real-time transport: Firebase Realtime DB (REST + SSE) when a
+   database URL is set; otherwise a local cross-tab fallback so the
+   page is fully usable for preview/testing on one machine.
+   ============================================================ */
+
+/* ---------- config ----------
+   Defaults come from config.js (window.DSC_CONFIG) so EVERY device — the
+   presenter screen and all the phones — share the same database. The Setup
+   panel can override on a single device (non-empty values win). */
+const CFG = (()=>{
+  const base = Object.assign({}, (window.DSC_CONFIG||{}));
+  let saved={}; try{ saved=JSON.parse(localStorage.getItem('dsc_cfg')||'{}'); }catch(e){}
+  for(const k in saved){ if(saved[k]) base[k]=saved[k]; }
+  return base;
+})();
+function saveCfg(){ localStorage.setItem('dsc_cfg', JSON.stringify(CFG)); }
+const esc=s=>(''+s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+/* ---------- realtime layer ---------- */
+const LIVE = (()=>{
+  const dbURL=()=> (CFG.dbURL||'').trim().replace(/\/+$/,'');
+  const isLive=()=> !!dbURL();
+  const listeners={};
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('dsc_live') : null;
+  const LKEY='dsc_tree';
+
+  function setDeep(obj, parts, data){
+    if(parts.length===0) return data;
+    obj = (obj && typeof obj==='object') ? obj : {};
+    const k=parts[0];
+    if(parts.length===1){ if(data===null) delete obj[k]; else obj[k]=data; return obj; }
+    obj[k]=setDeep(obj[k], parts.slice(1), data); return obj;
+  }
+  function getPath(tree, path){ let o=tree; for(const p of path.split('/').filter(Boolean)){ if(o==null)return null; o=o[p]; } return o===undefined?null:o; }
+
+  /* firebase REST */
+  function fbWrite(method, path, value){
+    const opt={method,headers:{'Content-Type':'application/json'}};
+    if(value!==undefined) opt.body=JSON.stringify(value);
+    return fetch(dbURL()+'/'+path+'.json',opt).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json().catch(()=>null); });
+  }
+  function fbOn(path, cb){
+    let cache=null;
+    const es=new EventSource(dbURL()+'/'+path+'.json');
+    const apply=(raw,patch)=>{ const m=JSON.parse(raw); const parts=m.path.split('/').filter(Boolean);
+      if(patch && m.data && typeof m.data==='object'){ for(const key in m.data){ cache=setDeep(cache,parts.concat(key.split('/').filter(Boolean)),m.data[key]); } }
+      else { cache=setDeep(cache,parts,m.data); }
+      cb(cache); };
+    es.addEventListener('put',e=>apply(e.data,false));
+    es.addEventListener('patch',e=>apply(e.data,true));
+    return ()=>{ try{es.close()}catch(e){} };
+  }
+
+  /* local fallback (cross-tab on one browser) */
+  const lread=()=>{ try{return JSON.parse(localStorage.getItem(LKEY)||'{}')}catch(e){return{}} };
+  const lwrite=t=>{ localStorage.setItem(LKEY,JSON.stringify(t)); if(bc)bc.postMessage(Date.now()); };
+  function fireLocal(){ const t=lread(); for(const p in listeners) listeners[p].forEach(cb=>cb(getPath(t,p))); }
+  if(bc) bc.onmessage=fireLocal;
+  window.addEventListener('storage',e=>{ if(e.key===LKEY) fireLocal(); });
+  function lwriteOp(method, path, value){
+    const t=lread(), parts=path.split('/').filter(Boolean);
+    if(method==='POST'){ const key='k'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); setDeep(t,parts.concat(key),value); lwrite(t); fireLocal(); return Promise.resolve({name:key}); }
+    if(method==='DELETE'){ setDeep(t,parts,null); lwrite(t); fireLocal(); return Promise.resolve(null); }
+    if(method==='PATCH'){ const cur=getPath(t,path)||{}; setDeep(t,parts,Object.assign({},cur,value)); lwrite(t); fireLocal(); return Promise.resolve(value); }
+    setDeep(t,parts,value); lwrite(t); fireLocal(); return Promise.resolve(value);
+  }
+
+  return {
+    isLive,
+    set:(p,v)=> isLive()?fbWrite('PUT',p,v):lwriteOp('PUT',p,v),
+    push:(p,v)=> isLive()?fbWrite('POST',p,v):lwriteOp('POST',p,v),
+    patch:(p,v)=> isLive()?fbWrite('PATCH',p,v):lwriteOp('PATCH',p,v),
+    remove:(p)=> isLive()?fbWrite('DELETE',p):lwriteOp('DELETE',p),
+    on:(p,cb)=>{ if(isLive()) return fbOn(p,cb);
+      (listeners[p]=listeners[p]||[]).push(cb); cb(getPath(lread(),p));
+      return ()=>{ listeners[p]=(listeners[p]||[]).filter(x=>x!==cb); }; }
+  };
+})();
+
+/* ---------- shared helpers ---------- */
+function genCode(){ const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<4;i++)s+=A[Math.random()*A.length|0]; return s; }
+function pid(){ let p=sessionStorage.getItem('dsc_pid'); if(!p){p='p'+Math.random().toString(36).slice(2,9);sessionStorage.setItem('dsc_pid',p);} return p; }
+function baseURL(){ const b=(CFG.baseURL||'').trim().replace(/[#?].*$/,'').replace(/\s+/g,''); return b || (location.origin+location.pathname); }
+function hostable(){ return /^https?:\/\//i.test(baseURL()); }
+function joinURL(code){ return baseURL()+'#j='+code; }
+function joinPanelHTML(code,label){
+  return `<div class="lab">${label||'Audience \u2014 scan or open'}</div>
+    <div id="qrslot"></div>
+    <div class="joincode">${code}</div>
+    <div class="joinurl" id="ju"></div>
+    <div id="testslot"></div>`;
+}
+function wireJoin(root,code){
+  const slot=root.querySelector('#qrslot'), ju=root.querySelector('#ju'), ts=root.querySelector('#testslot');
+  if(hostable()){
+    slot.innerHTML='<div class="qrbox" id="qr"></div>';
+    qrInto(slot.querySelector('#qr'), joinURL(code));
+    ju.innerHTML='open <b>'+esc(joinURL(code))+'</b>';
+    ts.innerHTML='<button class="btn ghost" id="testphone" style="margin-top:16px;font-size:12px">Open a test phone \u2197</button>';
+    ts.querySelector('#testphone').onclick=()=>window.open(joinURL(code),'_blank','noopener');
+  }else{
+    slot.innerHTML='<div class="qrnote">\u26a0\ufe0f No web address yet \u2014 nothing to scan</div>';
+    ju.innerHTML='This is a preview with no real address, so the code can\u2019t be scanned. <b>Host the file</b> (GitHub Pages, Netlify Drop or Vercel) and open it from there \u2014 or paste your page\u2019s address under \u2699\ufe0f Setup \u2014 and a live QR appears here.';
+  }
+  if(!LIVE.isLive()) ju.innerHTML+='<div style="margin-top:10px;color:var(--demo)">Demo mode \u2014 add a database in \u2699\ufe0f Setup so real phones sync.</div>';
+}
+function count(o){ return o?Object.keys(o).length:0; }
+function qrInto(box,url){ try{ const q=qrcode(0,'M'); q.addData(url); q.make(); box.innerHTML=q.createSvgTag({cellSize:5,margin:0}); }catch(e){ box.innerHTML='<div style="color:#999;font-size:12px;line-height:1.4;padding:10px">link too long to encode</div>'; } }
+function maskNum(n){ const d=(''+n).replace(/[^\d+]/g,''); return d.length>5 ? d.slice(0,3)+'•••••'+d.slice(-2) : d; }
+function maskPw(p){ if(!p) return ''; return p[0]+'•'.repeat(Math.min(Math.max(p.length-1,0),9))+(p.length>10?'…':''); }
+function crack(pw){
+  if(!pw) return {sec:0,label:'—'};
+  let set=0; if(/[a-z]/.test(pw))set+=26; if(/[A-Z]/.test(pw))set+=26; if(/\d/.test(pw))set+=10; if(/[^a-zA-Z0-9]/.test(pw))set+=33; set=set||1;
+  const sec=Math.pow(set,pw.length)/2/1e11;        // ~100 billion guesses/sec offline
+  return {sec,label:humanTime(sec)};
+}
+function humanTime(sec){
+  if(sec<1) return 'instant';
+  const yr=sec/31557600;
+  if(yr>=1e12) return 'longer than the universe';
+  if(yr>=1e6)  return Math.round(yr/1e4).toLocaleString()+' million centuries';
+  if(yr>=1000) return Math.round(yr/100).toLocaleString()+' centuries';
+  if(yr>=1)    return (yr>=10?Math.round(yr):Math.round(yr*10)/10)+(yr>=2?' years':' year');
+  const u=[['days',86400],['hours',3600],['minutes',60],['seconds',1]];
+  for(const [n,s] of u){ if(sec>=s){ const v=sec/s; return (v>=10?Math.round(v):Math.round(v*10)/10)+' '+n; } }
+  return 'instant';
+}
+async function sendHook(to,text){
+  const url=(CFG.hook||'').trim(); if(!url) return false;
+  // text/plain + no-cors keeps this a "simple" request, so it works from any
+  // hosted page without the webhook needing CORS headers. Body is a JSON string.
+  try{ await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({to,text})}); return true; }
+  catch(e){ return false; }
+}
+const SMS_MSG='\u26a0\ufe0f Gotcha! That was a digital-safety demo. You just gave your number to a stranger who promised a "prize". A real scammer would now have it. Stop \u00b7 Think \u00b7 Verify.';
+
+/* ============================================================
+   ROUTER  — phones that opened a join link see the participant
+   app; everyone else sees the presenter console.
+   ============================================================ */
+function route(){
+  const m=(location.hash||'').match(/#j=([A-Za-z0-9]{1,8})/);
+  if(m) participantApp(m[1].toUpperCase());
+  else presenterApp();
+}
+window.addEventListener('hashchange',route);
+
+/* ============================================================
+   DEMOS
+   ============================================================ */
+const VOTE_ROUNDS=[
+  {from:'VM-PAYTM', text:'Your Paytm KYC expires TODAY. Click http://paytm-verify.in or your account will be BLOCKED.', scam:true,  flags:['Urgency + threat ("TODAY", "BLOCKED")','Unofficial link','Paytm never asks this by SMS']},
+  {from:'HR Team',  text:'Hi, this is Priya from HR. Your interview is Monday 11am — details are in your email.', scam:false, flags:['No link, no OTP, no money','Verifiable through your own email']},
+  {from:'+91 98xxxx', text:'CONGRATULATIONS! You won ₹5,000. Send ₹200 processing fee to claim your prize.', scam:true, flags:['Pay-to-receive is always fraud','A prize that costs money isn\u2019t a prize']},
+  {from:'AD-SBIINB', text:'Your A/c is credited ₹42,500. Avl bal ₹58,200. \u2014 SBI', scam:false, flags:['No link, no action requested','A plain notification']},
+  {from:'AX-AMZN',  text:'Your parcel is held at customs. Pay ₹200 and share the OTP to release it.', scam:true, flags:['Asks for an OTP \u2014 never legitimate','Real couriers notify in-app']}
+];
+
+const STATIONS=[
+  {id:"click", num:"01", title:"Would You Click?",
+   goal:"Put a tempting link on the screen. Watch how many of the people in the room open it on their own phones \u2014 live \u2014 then drop the \u201cBeware\u201d on every device at once.",
+   steps:[{t:"Show the QR / join code on the big screen."},{t:"Ask everyone to scan or type the code."},{t:"Watch the click counter climb in real time."},{t:"Hit \u201cReveal to all phones\u201d \u2014 every phone flips to a warning."}],
+   freeze:"Everyone who tapped just trusted a stranger\u2019s link \u2014 in a room literally about scams. That reflex is exactly what fraudsters count on. Stop \u00b7 Think \u00b7 Verify.",
+   safety:"Nothing is collected and nothing real happens \u2014 the phones only show a warning you control from this screen."},
+
+  {id:"number", num:"02", title:"Just Your Number",
+   goal:"\u201cWin a voucher \u2014 just register your number.\u201d The moment someone submits, a real text lands on their phone (if you\u2019ve connected SMS), and their number streams onto your screen.",
+   steps:[{t:"Show the \u201cclaim your voucher\u201d join code."},{t:"People enter their number to \u2018claim\u2019."},{t:"A text hits their phone instantly; numbers appear on screen (masked)."},{t:"Reveal on screen and freeze: a stranger just texted them."}],
+   freeze:"You handed your number to a stranger because a screen dangled a prize \u2014 and seconds later they texted you. That number is all a scammer needs to start.",
+   safety:"Numbers show masked on screen and are wiped when you reset. A real SMS only sends if YOU connect a messaging service (config.js \u2192 hook); otherwise it\u2019s an on-screen reveal."},
+
+  {id:"phish", num:"03", title:"The Login Trap",
+   goal:"A convincing \u201cverify your account\u201d page opens on every phone. As people type, their entries appear on your screen in real time \u2014 the exact view a phishing site\u2019s operator gets.",
+   steps:[{t:"Tell the room: type a FAKE name + password."},{t:"Show the join code; they open the \u2018login\u2019."},{t:"Watch entries land on screen as they type."},{t:"Reveal: everything they typed was captured."}],
+   freeze:"A page that looks like your bank is not your bank. The moment you type into it, a stranger has it \u2014 you watched it happen on this screen.",
+   safety:"Ask people to use fake details. Passwords are never stored \u2014 the screen only shows the length, to prove capture without exposing anyone."},
+
+  {id:"vote", num:"04", title:"Vote the Room",
+   goal:"Show a real-looking message; the whole room votes Safe or Scam from their phones. The bar moves live, then you reveal the answer and the red flags. Five rounds, one room score.",
+   steps:[{t:"Read each message on the screen aloud."},{t:"Everyone votes Safe / Scam on their phone."},{t:"Reveal the answer and the red flags."},{t:"Next round; end on the room\u2019s score."}],
+   freeze:"Scams almost always pair pressure with a link or a payment. Genuine messages rarely do both \u2014 that single test catches most of them.",
+   safety:"Illustrative messages only; none of the links are real."},
+
+  {id:"crack", num:"05", title:"Crack the Room",
+   goal:"Everyone types a sample password on their phone and watches its crack-time on a live leaderboard. The weakest in the room sits at the top \u2014 then you build a strong passphrase together and watch it jump to centuries.",
+   steps:[{t:"Ask everyone to type a SAMPLE password (never a real one)."},{t:"Crack-times appear on a live leaderboard."},{t:"Point out the weakest \u2014 cracked instantly."},{t:"Build a long passphrase; re-submit; watch it soar."}],
+   freeze:"Length beats complexity, and reuse is the real danger \u2014 one breach unlocks every account that shared that password. Long, unique, and a password manager.",
+   safety:"Never type a real password. Only a masked hint and the crack-time reach the screen \u2014 never the password itself."}
+];
+const byId=id=>STATIONS.find(s=>s.id===id);
+
+/* ============================================================
+   PRESENTER CONSOLE
+   ============================================================ */
+let unsub=null, sess=null;
+function clearLive(){ if(unsub){unsub();unsub=null;} }
+
+function presenterApp(){
+  clearLive();
+  document.getElementById('root').innerHTML='<div class="topbar" id="topbar"></div><div class="wrap" id="app"></div>';
+  buildSetupSheet();
+  goHome();
+}
+
+function statusPill(){
+  return LIVE.isLive()
+    ? '<span class="tb-pill live"><span class="dot"></span>LIVE</span>'
+    : '<span class="tb-pill demo"><span class="dot"></span>DEMO MODE</span>';
+}
+
+function goHome(){
+  clearLive(); sess=null; closeSheets(); window.scrollTo(0,0);
+  document.getElementById('topbar').innerHTML=
+    `<span class="tb-title">Digital Safety Console</span><span class="tb-sub">\u00b7 Antrisha Foundation</span>
+     <span class="tb-spacer"></span>${statusPill()}
+     <button class="tb-act" id="setupBtn">\u2699\ufe0f Setup</button>`;
+  document.getElementById('app').innerHTML=`
+    <section class="hero">
+      <div class="kick">Live audience console</div>
+      <h1>Scam the room, <span class="g">safely.</span></h1>
+      <p>Five demos the whole audience joins from their own phones. They scan a code, you watch their clicks, numbers and votes land on screen in real time \u2014 then you reveal, together, exactly how easily it happened. Tap a demo to open a live session.</p>
+      <div class="howto">
+        <div class="pill"><span class="s">1</span><span>Open a demo \u2014 a <b>join code &amp; QR</b> appear</span></div>
+        <div class="pill"><span class="s">2</span><span>The room <b>scans</b> with their phones</span></div>
+        <div class="pill"><span class="s">3</span><span>Their actions show up <b>live</b>, then you reveal</span></div>
+      </div>
+    </section>
+    <div class="grid">
+      ${STATIONS.map(s=>`<button class="card" data-id="${s.id}">
+        <div class="top"><span class="n">${s.num}</span><span class="play">\u25b6 live \u00b7 audience</span></div>
+        <h3>${esc(s.title)}</h3><p>${esc(s.goal)}</p></button>`).join('')}
+    </div>`;
+  document.getElementById('setupBtn').onclick=openSetup;
+  document.querySelectorAll('.card').forEach(b=>b.onclick=()=>openStation(b.dataset.id));
+}
+
+function openStation(id){
+  clearLive(); closeSheets(); window.scrollTo(0,0);
+  const s=byId(id), i=STATIONS.indexOf(s);
+  sess={code:genCode(), demo:id};
+  // (re)initialise this session's room
+  LIVE.set('s/'+sess.code, {meta:{demo:id, ts:Date.now()}, phase:'collect', round:0, revealed:false});
+
+  document.getElementById('topbar').innerHTML=`
+    <button class="tb-btn" id="home" title="All demos">\u2302</button>
+    <button class="tb-btn" id="prev" ${i===0?'disabled':''} title="Previous">\u2039</button>
+    <button class="tb-btn" id="next" ${i===STATIONS.length-1?'disabled':''} title="Next">\u203a</button>
+    <div style="margin-left:6px"><div class="tb-title">${esc(s.title)}</div><div class="tb-sub">Demo ${s.num} of ${STATIONS.length}</div></div>
+    <span class="tb-spacer"></span>${statusPill()}
+    <button class="tb-act" id="notesBtn">\ud83d\udccb Notes</button>
+    <button class="tb-act" id="setupBtn">\u2699\ufe0f</button>`;
+  document.getElementById('app').innerHTML=`<div class="station-strip"><span class="num">DEMO ${s.num}</span></div><div class="stage" id="stage"></div>`;
+  buildNotesSheet(s);
+  document.getElementById('home').onclick=goHome;
+  document.getElementById('prev').onclick=()=>{ if(i>0)openStation(STATIONS[i-1].id); };
+  document.getElementById('next').onclick=()=>{ if(i<STATIONS.length-1)openStation(STATIONS[i+1].id); };
+  document.getElementById('notesBtn').onclick=openNotes;
+  document.getElementById('setupBtn').onclick=openSetup;
+  PRESENT[id](document.getElementById('stage'));
+}
+
+/* shared presenter scaffold: join panel + live panel */
+function presenterShell(stage, liveTitle, extraControls){
+  const code=sess.code;
+  stage.innerHTML=`<div class="pres two">
+    <div class="joinpanel" id="jp">${joinPanelHTML(code)}</div>
+    <div class="livepanel">
+      <div class="livehead"><span class="ttl">${liveTitle}</span></div>
+      <div id="live" style="flex:1;display:flex;flex-direction:column"></div>
+      <div class="ctrlrow">${extraControls||''}</div>
+    </div>
+  </div>`;
+  wireJoin(stage.querySelector('#jp'), code);
+  return stage.querySelector('#live');
+}
+
+const PRESENT={};
+
+/* 01 — WOULD YOU CLICK? */
+PRESENT.click=stage=>{
+  const live=presenterShell(stage,'Clicks landing now',
+    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
+  const draw=root=>{
+    const clicks=count(root&&root.click), revealed=root&&root.revealed;
+    live.innerHTML=`<div style="text-align:center;margin:auto 0">
+      <div class="counter">${clicks}</div>
+      <div class="counterlab">${clicks===1?'person':'people'} tapped \u201cclaim\u201d</div>
+      ${revealed?'<div class="verdict r">REVEALED TO EVERYONE</div>':'<div class="subtext">Waiting for the room to take the bait\u2026</div>'}
+    </div>`;
+  };
+  unsub=LIVE.on('s/'+sess.code,draw);
+  stage.querySelector('#reveal').onclick=()=>LIVE.set('s/'+sess.code+'/revealed',true);
+  stage.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.click(stage));
+};
+
+/* 02 — JUST YOUR NUMBER */
+PRESENT.number=stage=>{
+  const texted=!!(CFG.hook||'').trim();
+  const live=presenterShell(stage,texted?'Numbers in \u2014 texts sent instantly':'Numbers coming in',
+    `<button class="btn danger" id="reveal">Reveal on screen</button><button class="btn ghost" id="reset">Reset</button>`);
+  const draw=root=>{
+    const nums=root&&root.numbers?Object.values(root.numbers):[], revealed=root&&root.revealed;
+    if(!nums.length){
+      live.innerHTML=`<div class="empty"><div class="big">\ud83c\udf81</div><div>No one\u2019s claimed yet \u2014 <span class="waitdots">waiting</span></div>${texted?'<div style="font-size:12px;color:var(--faint)">A text is sent the moment someone submits.</div>':''}</div>`;
+    }else{
+      const rows=nums.slice().sort((a,b)=>b.t-a.t).map(n=>`<div class="feedrow"><div class="av">\ud83d\udcf1</div>
+        <div class="main"><div class="a">${esc(maskNum(n.n))}</div><div class="b">${texted?'just got a text from a stranger':'just handed it over to claim a prize'}</div></div>
+        <div class="tag">${texted?'texted':'captured'}</div></div>`).join('');
+      live.innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter" style="font-size:clamp(32px,7vw,52px)">${nums.length}</div><div class="counterlab">numbers given to a stranger</div></div>
+        ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED ON SCREEN</div>':''}
+        <div class="feed">${rows}</div>`;
+    }
+  };
+  unsub=LIVE.on('s/'+sess.code,draw);
+  stage.querySelector('#reveal').onclick=()=>LIVE.set('s/'+sess.code+'/revealed',true);
+  stage.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.number(stage));
+};
+
+/* 03 — THE LOGIN TRAP */
+PRESENT.phish=stage=>{
+  const live=presenterShell(stage,'The operator\u2019s view (everything typed)',
+    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
+  const draw=root=>{
+    const creds=root&&root.creds?Object.values(root.creds):[], revealed=root&&root.revealed;
+    if(!creds.length){
+      live.innerHTML=`<div class="empty"><div class="big">\ud83d\udd13</div><div>Waiting for the first \u201clogin\u201d<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">Tell the room to type fake details.</div></div>`;
+    }else{
+      const rows=creds.slice().sort((a,b)=>b.t-a.t).map(c=>`<div class="feedrow"><div class="av">\ud83d\udc64</div>
+        <div class="main"><div class="a">${esc(c.u||'(blank)')}</div><div class="b">password: ${'\u2022'.repeat(Math.min(c.plen||0,16))||'(empty)'} \u2014 ${c.plen||0} chars</div></div>
+        <div class="tag">stolen</div></div>`).join('');
+      live.innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter scam" style="font-size:clamp(32px,7vw,52px)">${creds.length}</div><div class="counterlab">logins captured</div></div>
+        ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED TO EVERYONE</div>':''}
+        <div class="feed">${rows}</div>`;
+    }
+  };
+  unsub=LIVE.on('s/'+sess.code,draw);
+  stage.querySelector('#reveal').onclick=()=>LIVE.set('s/'+sess.code+'/revealed',true);
+  stage.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.phish(stage));
+};
+
+/* 04 — VOTE THE ROOM */
+PRESENT.vote=stage=>{
+  let roundCache=0;
+  const code=sess.code;
+  stage.innerHTML=`<div class="pres two">
+    <div class="joinpanel" id="jp">${joinPanelHTML(code,'Audience \u2014 scan to vote')}</div>
+    <div class="livepanel">
+      <div class="livehead"><span class="ttl" id="rndlab">Round 1 of ${VOTE_ROUNDS.length}</span></div>
+      <div id="live" style="flex:1"></div>
+      <div class="ctrlrow" id="ctrls"></div>
+    </div>
+  </div>`;
+  wireJoin(stage.querySelector('#jp'), code);
+  const live=stage.querySelector('#live'), ctrls=stage.querySelector('#ctrls'), rndlab=stage.querySelector('#rndlab');
+
+  const draw=root=>{
+    const r=(root&&root.round)||0, revealed=root&&root.revealed, q=VOTE_ROUNDS[r];
+    roundCache=r;
+    rndlab.textContent=`Round ${r+1} of ${VOTE_ROUNDS.length}`;
+    const votes=root&&root.votes&&root.votes['r'+r]?Object.values(root.votes['r'+r]):[];
+    const safe=votes.filter(v=>v==='safe').length, scam=votes.filter(v=>v==='scam').length, tot=safe+scam||1;
+    if(r>=VOTE_ROUNDS.length){
+      live.innerHTML='';
+      return;
+    }
+    live.innerHTML=`<div class="msgcard"><div class="from">${esc(q.from)}</div><div class="bub">${esc(q.text)}</div>
+      ${revealed?`<div class="flags"><div class="from" style="margin:12px 0 4px;color:${q.scam?'var(--scam)':'var(--safe)'}">${q.scam?'\u2717 Scam':'\u2713 Safe'} \u2014 why</div>${q.flags.map(f=>`<div class="flagline">\u2022 ${esc(f)}</div>`).join('')}</div>`:''}</div>
+      <div class="votebars">
+        <div class="vbar safe"><div class="vt"><span>\u2713 Safe</span><span>${safe}</span></div><div class="track"><div class="fillb" style="width:${Math.round(safe/tot*100)}%">${safe?Math.round(safe/tot*100)+'%':''}</div></div></div>
+        <div class="vbar scam"><div class="vt"><span>\u2717 Scam</span><span>${scam}</span></div><div class="track"><div class="fillb" style="width:${Math.round(scam/tot*100)}%">${scam?Math.round(scam/tot*100)+'%':''}</div></div></div>
+      </div>`;
+    // controls
+    if(revealed){
+      const last=r===VOTE_ROUNDS.length-1;
+      ctrls.innerHTML=last?'<button class="btn primary" id="score">See the room score</button><button class="btn ghost" id="reset">Restart</button>'
+                          :'<button class="btn primary" id="vnext">Next round \u2192</button>';
+      const nx=ctrls.querySelector('#vnext'); if(nx) nx.onclick=()=>LIVE.patch('s/'+sess.code,{round:r+1,revealed:false});
+      const sc=ctrls.querySelector('#score'); if(sc) sc.onclick=()=>showScore(root,live,ctrls);
+      const rs=ctrls.querySelector('#reset'); if(rs) rs.onclick=()=>resetRoom(()=>PRESENT.vote(stage));
+    }else{
+      ctrls.innerHTML='<button class="btn danger" id="reveal">Reveal answer</button><button class="btn ghost" id="reset">Reset</button>';
+      ctrls.querySelector('#reveal').onclick=()=>LIVE.set('s/'+sess.code+'/revealed',true);
+      ctrls.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.vote(stage));
+    }
+  };
+  unsub=LIVE.on('s/'+sess.code,draw);
+
+  function showScore(root,live,ctrls){
+    let right=0,total=0;
+    VOTE_ROUNDS.forEach((q,ri)=>{ const vs=root.votes&&root.votes['r'+ri]?Object.values(root.votes['r'+ri]):[];
+      vs.forEach(v=>{ total++; if((v==='scam')===q.scam) right++; }); });
+    const pct=total?Math.round(right/total*100):0;
+    live.innerHTML=`<div style="text-align:center;margin:auto 0"><div class="counter ${pct>=70?'safe':'scam'}">${pct}%</div>
+      <div class="counterlab">of the room\u2019s votes were right</div>
+      <div class="subtext">${right} correct out of ${total} votes cast across ${VOTE_ROUNDS.length} rounds.</div></div>`;
+    ctrls.innerHTML='<button class="btn primary" id="again">Run it again</button>';
+    ctrls.querySelector('#again').onclick=()=>resetRoom(()=>PRESENT.vote(stage));
+  }
+};
+
+/* 05 — CRACK THE ROOM */
+PRESENT.crack=stage=>{
+  const live=presenterShell(stage,'Live crack-time leaderboard',
+    '<button class="btn ghost" id="reset">Clear board</button>');
+  const draw=root=>{
+    const list=root&&root.pwd?Object.values(root.pwd):[];
+    if(!list.length){
+      live.innerHTML=`<div class="empty"><div class="big">\ud83d\udd10</div><div>Waiting for the first password<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">Remind the room: type a SAMPLE, never a real one.</div></div>`;
+      return;
+    }
+    list.sort((a,b)=>a.sec-b.sec);
+    const rows=list.map((p,i)=>{ const cls=i===0?'weak':(p.sec>3155760000?'strong':''); 
+      return `<div class="brow ${cls}"><div class="rk">${i+1}</div><div class="pw">${esc(p.m||'')}</div><div class="yr">${esc(p.label)}${i===0?' \u2190 weakest':''}</div></div>`; }).join('');
+    live.innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter" style="font-size:clamp(30px,6vw,46px)">${list.length}</div><div class="counterlab">passwords on the board \u00b7 weakest on top</div></div><div class="board">${rows}</div>`;
+  };
+  unsub=LIVE.on('s/'+sess.code,draw);
+  stage.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.crack(stage));
+};
+
+/* presenter utilities */
+function fetchRoom(){
+  return new Promise(res=>{
+    let u, settled=false;
+    const cb=d=>{ if(settled) return; settled=true; res(d); setTimeout(()=>{ try{ if(u) u(); }catch(e){} },0); };
+    u=LIVE.on('s/'+sess.code, cb);
+  });
+}
+function resetRoom(rebuild){
+  const code=sess.code;
+  LIVE.set('s/'+code,{meta:{demo:sess.demo,ts:Date.now()},phase:'collect',round:0,revealed:false}).then(()=>{
+    clearLive(); rebuild();
+  });
+}
+
+/* ============================================================
+   PARTICIPANT (PHONE) APP
+   ============================================================ */
+function participantApp(code){
+  clearLive();
+  const root=document.getElementById('root');
+  document.getElementById('scrim').classList.remove('open');
+  let sig=null, submitted=null;            // re-render only when the meaningful state changes
+  const path='s/'+code;
+
+  function render(data){
+    if(!data||!data.meta){ root.innerHTML=shellWait(code,'Waiting for the host to start\u2026','This code isn\u2019t live yet. Keep this open \u2014 it\u2019ll wake up automatically.'); return; }
+    const demo=data.meta.demo, revealed=!!data.revealed, round=data.round||0;
+    const me=pid();
+    const localState=submitted||{};
+    const newSig=[demo,revealed,round,JSON.stringify(localState)].join('|');
+    if(newSig===sig) return;       // avoid clobbering inputs / focus
+    sig=newSig;
+    PVIEW[demo](root,{code,data,demo,revealed,round,me,submitted,setSubmitted:v=>{submitted=v;sig=null;render(curData);}});
+  }
+  let curData=null;
+  unsub=LIVE.on(path,d=>{ curData=d; render(d); });
+}
+
+function shellHead(){ return `<div class="pv-head"><span class="lk">\ud83d\udd12</span><span>Digital Safety \u00b7 live session</span></div>`; }
+function shellWait(code,title,sub){
+  return `<div class="pv">${shellHead()}<div class="pv-wait"><div class="spinner"></div><h2>${esc(title)}</h2><p style="max-width:30ch">${esc(sub)}</p><div class="pv-note">session ${esc(code)}</div></div></div>`;
+}
+
+const PVIEW={};
+
+/* 01 click */
+PVIEW.click=(root,ctx)=>{
+  if(ctx.revealed){ root.innerHTML=beware(); return; }
+  if(ctx.submitted&&ctx.submitted.done){
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>You\u2019re in!</h2><p>Hang on \u2014 look up at the big screen.</p></div></div>`;
+    return;
+  }
+  root.innerHTML=`<div class="pv-bait"><div class="gift">\ud83c\udf81</div><h1>You\u2019ve won a reward!</h1><p>A \u20b91,000 voucher is waiting for you.</p><p style="font-size:13px">Tap below to verify and claim instantly.</p>
+    <button class="pv-btn bait" id="claim">Verify &amp; claim now</button></div>`;
+  root.querySelector('#claim').onclick=()=>{
+    LIVE.set('s/'+ctx.code+'/click/'+ctx.me,{t:Date.now()});
+    ctx.setSubmitted({done:true});
+  };
+};
+
+/* 02 number */
+PVIEW.number=(root,ctx)=>{
+  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Gotcha.','That number is gone.','You just gave your phone number to a stranger because a screen promised a prize. <b>That\u2019s all a scammer needs to start.</b> Never hand your number to claim something you didn\u2019t enter.'); return; }
+  if(ctx.submitted&&ctx.submitted.done){
+    const texted=!!(CFG.hook||'').trim();
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Registered!</h2><p>${texted?'\ud83d\udc40 Check your text messages\u2026':'Your entry is in. Watch the big screen.'}</p></div></div>`;
+    return;
+  }
+  root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-body">
+    <h2>\ud83c\udf89 Claim your \u20b92,000 voucher</h2><p class="sub">Limited offer \u2014 just register your mobile number and we\u2019ll text you the voucher right away.</p>
+    <div class="pv-flabel">Mobile number</div>
+    <input class="pv-field" id="num" inputmode="tel" placeholder="9876543210" autocomplete="off">
+    <button class="pv-btn go" id="go">Claim my voucher</button>
+    <div class="pv-note">By tapping you\u2019ll see why this was a test \u2014 nothing is charged.</div>
+  </div></div>`;
+  const inp=root.querySelector('#num');
+  root.querySelector('#go').onclick=()=>{
+    const v=inp.value.trim(); if(v.replace(/\D/g,'').length<6){ inp.style.borderColor='var(--scam)'; inp.focus(); return; }
+    LIVE.set('s/'+ctx.code+'/numbers/'+ctx.me,{n:v,t:Date.now()});
+    sendHook(v, SMS_MSG);            // text goes out the moment they submit
+    ctx.setSubmitted({done:true});
+  };
+};
+
+/* 03 phish */
+PVIEW.phish=(root,ctx)=>{
+  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Phished.','Everything you typed is on the screen.','You typed your details into a page that only looked real \u2014 and a stranger captured them live. <b>A page that imitates your bank is not your bank.</b> Check the address, and never log in from a link.'); return; }
+  if(ctx.submitted&&ctx.submitted.done){
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Signing you in\u2026</h2><p>Please wait. (Look at the big screen.)</p></div></div>`;
+    return;
+  }
+  root.innerHTML=`<div class="pv" style="background:#0b1320">${shellHead()}<div class="pv-body">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px"><div style="width:34px;height:34px;border-radius:9px;background:#1b66c9;display:grid;place-items:center;color:#fff;font-weight:800">S</div><b style="font-size:18px">SecureBank</b></div>
+    <h2 style="font-size:22px">Verify your account</h2><p class="sub">Unusual activity detected. Sign in to confirm it\u2019s really you.</p>
+    <div style="background:#241a09;border:1px solid #4a3a18;color:var(--demo);font-size:12.5px;border-radius:10px;padding:10px 12px;margin-bottom:8px">For this demo, type a <b>fake</b> name and a <b>fake</b> password.</div>
+    <div class="pv-flabel">Username</div><input class="pv-field" id="u" autocomplete="off" placeholder="e.g. demo_user">
+    <div class="pv-flabel">Password</div><input class="pv-field" id="p" type="password" autocomplete="off" placeholder="anything fake">
+    <button class="pv-btn go" id="go">Sign in</button>
+  </div></div>`;
+  root.querySelector('#go').onclick=()=>{
+    const u=root.querySelector('#u').value.trim(), p=root.querySelector('#p').value;
+    LIVE.set('s/'+ctx.code+'/creds/'+ctx.me,{u:u.slice(0,40),plen:p.length,t:Date.now()});
+    ctx.setSubmitted({done:true});
+  };
+};
+
+/* 04 vote */
+PVIEW.vote=(root,ctx)=>{
+  const r=ctx.round, q=VOTE_ROUNDS[r];
+  if(r>=VOTE_ROUNDS.length || !q){ root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>That\u2019s a wrap!</h2><p>Look at the big screen for the room\u2019s score.</p></div></div>`; return; }
+  const myVote=ctx.submitted&&ctx.submitted['r'+r];
+  if(ctx.revealed){
+    const right=(myVote==='scam')===q.scam;
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-reveal"><div class="ic">${q.scam?'\u26a0\ufe0f':'\u2705'}</div>
+      <h1 class="${q.scam?'r':'g'}">${q.scam?'Scam':'Safe'}</h1>
+      ${myVote?`<div class="big2" style="color:${right?'var(--safe)':'var(--scam)'}">You voted ${myVote==='scam'?'Scam':'Safe'} \u2014 ${right?'correct \u2713':'look again'}</div>`:'<div class="big2">No vote recorded</div>'}
+      <p>${esc(q.flags[0])}</p><div class="pv-note">Next round coming up on the screen\u2026</div></div></div>`;
+    return;
+  }
+  root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-body">
+    <div class="pv-flabel">Round ${r+1} of ${VOTE_ROUNDS.length} \u00b7 from ${esc(q.from)}</div>
+    <div class="msgcard" style="margin-top:10px"><div class="bub">${esc(q.text)}</div></div>
+    <p class="sub" style="margin-top:18px">Is this safe, or a scam?</p>
+    <div class="pv-vote">
+      <button class="safe ${myVote==='safe'?'on':''}" data-v="safe">\u2713 Safe</button>
+      <button class="scam ${myVote==='scam'?'on':''}" data-v="scam">\u2717 Scam</button>
+    </div></div></div>`;
+  root.querySelectorAll('.pv-vote button').forEach(b=>b.onclick=()=>{
+    LIVE.set('s/'+ctx.code+'/votes/r'+r+'/'+ctx.me,b.dataset.v);
+    const s=Object.assign({},ctx.submitted); s['r'+r]=b.dataset.v; ctx.setSubmitted(s);
+  });
+};
+
+/* 05 crack */
+PVIEW.crack=(root,ctx)=>{
+  root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-body">
+    <h2>How strong is it?</h2><p class="sub">Type a <b>sample</b> password (never a real one) and watch how long it survives an attack.</p>
+    <input class="pv-field" id="pw" autocomplete="off" placeholder="type here\u2026">
+    <div class="pv-meter"><div class="f" id="mf"></div></div>
+    <div class="pv-crack" id="ct">\u2014</div><div class="pv-cracklab">time to crack</div>
+    <button class="pv-btn go" id="go">Put it on the board</button>
+    <div class="pv-note" id="note">Only a masked hint reaches the screen \u2014 never your password.</div>
+  </div></div>`;
+  const inp=root.querySelector('#pw'), mf=root.querySelector('#mf'), ct=root.querySelector('#ct');
+  const upd=()=>{ const v=inp.value, c=crack(v);
+    ct.textContent=v?c.label:'\u2014';
+    const score=v?Math.min(Math.log10(c.sec+1)/12,1):0;
+    mf.style.width=(score*100)+'%';
+    mf.style.background=score<.25?'var(--scam)':score<.6?'var(--beacon)':'var(--safe)';
+  };
+  inp.oninput=upd; upd();
+  root.querySelector('#go').onclick=()=>{
+    const v=inp.value; if(!v) { inp.focus(); return; }
+    const c=crack(v);
+    LIVE.set('s/'+ctx.code+'/pwd/'+ctx.me,{m:maskPw(v),label:c.label,sec:c.sec,t:Date.now()});
+    root.querySelector('#note').innerHTML='<b style="color:var(--safe)">On the board!</b> Try a longer passphrase and add it again to watch it climb.';
+  };
+};
+
+/* shared "beware" reveal for phones */
+function beware(ic,title,big,body){
+  ic=ic||'\u26a0\ufe0f'; title=title||'Beware!'; big=big||'It\u2019s a scam.';
+  body=body||'You just opened a stranger\u2019s link \u2014 in a room about scams. A real one could have stolen your login or your money. <b>Stop \u00b7 Think \u00b7 Verify.</b>';
+  return `<div class="pv"><div class="pv-reveal" style="background:linear-gradient(180deg,#2a0d08,#160606);min-height:100dvh">
+    <div class="ic">${ic}</div><h1 class="r">${esc(title)}</h1><div class="big2">${esc(big)}</div>
+    <p>${body}</p></div></div>`;
+}
+
+/* ============================================================
+   SLIDE-OVERS: notes + setup
+   ============================================================ */
+const scrim=document.getElementById('scrim'), notesEl=document.getElementById('notes'), setupEl=document.getElementById('setup');
+scrim.onclick=closeSheets;
+function openNotes(){ scrim.classList.add('open'); notesEl.classList.add('open'); }
+function openSetup(){ buildSetupSheet(); scrim.classList.add('open'); setupEl.classList.add('open'); }
+function closeSheets(){ scrim.classList.remove('open'); notesEl.classList.remove('open'); setupEl.classList.remove('open'); }
+window.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(notesEl.classList.contains('open')||setupEl.classList.contains('open'))closeSheets(); else if(sess)goHome(); } });
+
+function buildNotesSheet(s){
+  notesEl.innerHTML=`<button class="x" id="cn">\u2715</button>
+    <h3>${esc(s.title)}</h3>
+    <h4>How to run it</h4><ol>${s.steps.map(st=>`<li>${esc(st.t)}</li>`).join('')}</ol>
+    <h4>Freeze &amp; explain</h4><div class="ncall f"><span class="l">say this</span>${esc(s.freeze)}</div>
+    <h4>Safety</h4><div class="ncall s"><span class="l">good to know</span>${esc(s.safety)}</div>`;
+  notesEl.querySelector('#cn').onclick=closeSheets;
+}
+
+function buildSetupSheet(){
+  const live=LIVE.isLive(), host=hostable();
+  setupEl.innerHTML=`<button class="x" id="cs">\u2715</button>
+    <h3>Setup</h3>
+    <p>The demos work right now in <b>demo mode</b> (test on this device using the \u201cOpen a test phone\u201d button). To run with a real audience\u2019s phones, set the two things below \u2014 one time, on the presenting computer.</p>
+    <div class="statusline ${live?'ok':'no'}">${live?'\u25cf Connected \u2014 real phones can join':'\u25cb Demo mode \u2014 add a database URL to go live'}</div>
+    ${host?'':'<div class="statusline no" style="margin-top:8px">\u25cb No web address \u2014 the join QR can\u2019t be scanned until this page is hosted (or you set its address below)</div>'}
+
+    <h4>1 \u00b7 Public page address</h4>
+    <p>The QR code points phones at wherever this page lives. Once you <b>host the file</b> (GitHub Pages, Netlify Drop or Vercel \u2014 about 60 seconds) and open it from that address, this fills in by itself. While previewing, paste the hosted address here so the QR works.</p>
+    <div class="setlabel">Hosted page URL</div>
+    <input class="field" id="baseURL" placeholder="https://your-site.netlify.app/index.html" value="${esc(CFG.baseURL||'')}">
+
+    <h4>2 \u00b7 Real-time database</h4>
+    <p>Create a free <b>Firebase</b> project \u2192 build a <b>Realtime Database</b> \u2192 paste its URL here. In test mode its rules allow public read/write, which is all this needs for a session.</p>
+    <div class="setlabel">Realtime Database URL</div>
+    <input class="field" id="dbURL" placeholder="https://your-project-default-rtdb.firebaseio.com" value="${esc(CFG.dbURL||'')}">
+
+    <h4>3 \u00b7 WhatsApp / SMS (optional)</h4>
+    <p>\u201cJust Your Number\u201d can send a real message to each phone on reveal. Point this at a webhook from <b>Twilio</b>, <b>Meta WhatsApp Cloud API</b>, or a no-code tool (Make / Zapier) that accepts <code>{ "to": "\u2026", "text": "\u2026" }</code> and sends the message. Leave blank for an on-screen-only reveal.</p>
+    <div class="setlabel">Messaging webhook URL</div>
+    <input class="field" id="hook" placeholder="https://hook.make.com/\u2026" value="${esc(CFG.hook||'')}">
+
+    <button class="savebtn" id="save">Save on this device</button>
+    <p style="margin-top:16px;font-size:12.5px">This panel saves only on <b>this</b> computer. For a hosted event, set these once in <code>config.js</code> instead \u2014 that\u2019s what lets the audience\u2019s phones connect to the same session. See the README.</p>`;
+  setupEl.querySelector('#cs').onclick=closeSheets;
+  setupEl.querySelector('#save').onclick=()=>{
+    CFG.baseURL=setupEl.querySelector('#baseURL').value.trim();
+    CFG.dbURL=setupEl.querySelector('#dbURL').value.trim();
+    CFG.hook=setupEl.querySelector('#hook').value.trim();
+    saveCfg(); closeSheets();
+    if(sess) openStation(sess.demo); else goHome();
+  };
+}
+
+/* go */
+route();
+</script>

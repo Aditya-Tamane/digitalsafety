@@ -242,6 +242,30 @@
     body.participant .pv::after{content:"";position:absolute;top:14px;left:50%;transform:translateX(-50%);width:120px;height:7px;border-radius:99px;background:#0a1016;z-index:9;pointer-events:none}
     body.participant .pv-head{padding-top:26px}
   }
+  /* ---------- shopping bait screens (participant) ---------- */
+  .pv-shop{flex:1;display:flex;flex-direction:column;background:#0b0f14;min-height:0}
+  .shopbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#10161d;border-bottom:1px solid var(--line-soft)}
+  .shoplogo{font-weight:800;font-size:17px;color:var(--text)}
+  .shopflash{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;background:var(--beacon);color:#1c1300;padding:5px 10px;border-radius:999px}
+  .shopimg{font-size:120px;text-align:center;padding:34px 0 10px;background:radial-gradient(300px 160px at 50% 30%,#16242e,transparent)}
+  .shopbody{padding:18px 22px 30px;display:flex;flex-direction:column;flex:1}
+  .shopname{font-size:24px;font-weight:800;line-height:1.15}
+  .shopprice{display:flex;align-items:baseline;gap:10px;margin:12px 0}
+  .shopprice .now{font-size:30px;font-weight:800;color:var(--safe)}
+  .shopprice .was{font-size:16px;color:var(--faint);text-decoration:line-through}
+  .shopprice .off{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--scam);background:var(--scam-d);border:1px solid #5a2b22;border-radius:6px;padding:2px 8px}
+  .shopstock{font-size:13px;color:var(--demo);margin-bottom:18px}
+  .pv-btn.shop{margin-top:auto;background:var(--beacon);color:#1c1300}
+
+  /* ---------- ranking podium (presenter leaderboard) ---------- */
+  .brow.rankrow .medal{font-size:22px;width:26px;flex:none;text-align:center}
+  .brow.win{border-color:var(--safe);background:linear-gradient(90deg,#10271f,#0a141a);box-shadow:0 0 0 1px #1f4a3c}
+  .brow.win .pw{color:var(--safe)}
+  .brow.win .yr{color:var(--safe);font-weight:700}
+  .rankbig{font-family:var(--mono);font-weight:800;font-size:64px;line-height:1;color:var(--beacon)}
+  .rankbig.g{color:var(--safe)}
+  .rankbig .ranktot{font-size:24px;color:var(--faint);font-weight:700}
+
   .spinner{width:38px;height:38px;border:3px solid #ffffff20;border-top-color:var(--beacon);border-radius:50%;animation:spin .8s linear infinite;margin:auto}
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes blink{50%{opacity:.35}}
@@ -2703,32 +2727,38 @@ const VOTE_ROUNDS=[
 
 const STATIONS=[
   {id:"click", num:"01", title:"Would You Click?",
-   goal:"Put a tempting link on the screen. Watch how many of the people in the room open it on their own phones \u2014 live \u2014 then drop the \u201cBeware\u201d on every device at once.",
+   goal:"Put a tempting \u201cflash sale\u201d deal on the screen. Watch how many people open it on their own phones \u2014 live \u2014 then drop the \u201cBeware\u201d on every device at once.",
    steps:[{t:"Show the QR / join code on the big screen."},{t:"Ask everyone to scan or type the code."},{t:"Watch the click counter climb in real time."},{t:"Hit \u201cReveal to all phones\u201d \u2014 every phone flips to a warning."}],
-   freeze:"Everyone who tapped just trusted a stranger\u2019s link \u2014 in a room literally about scams. That reflex is exactly what fraudsters count on. Stop \u00b7 Think \u00b7 Verify.",
+   freeze:"Everyone who tapped just trusted a stranger\u2019s deal \u2014 in a room literally about scams. That reflex is exactly what fraudsters count on. Stop \u00b7 Think \u00b7 Verify.",
    safety:"Nothing is collected and nothing real happens \u2014 the phones only show a warning you control from this screen."},
 
   {id:"number", num:"02", title:"Just Your Number",
-   goal:"\u201cWin a voucher \u2014 just register your number.\u201d The moment someone submits, a real text lands on their phone (if you\u2019ve connected SMS), and their number streams onto your screen.",
-   steps:[{t:"Show the \u201cclaim your voucher\u201d join code."},{t:"People enter their number to \u2018claim\u2019."},{t:"A text hits their phone instantly; numbers appear on screen (masked)."},{t:"Reveal on screen and freeze: a stranger just texted them."}],
-   freeze:"You handed your number to a stranger because a screen dangled a prize \u2014 and seconds later they texted you. That number is all a scammer needs to start.",
-   safety:"Numbers show masked on screen and are wiped when you reset. A real SMS only sends if YOU connect a messaging service (config.js \u2192 hook); otherwise it\u2019s an on-screen reveal."},
+   goal:"\u201cUnlock the coupon \u2014 just enter your number.\u201d The moment someone submits, a real text lands on their phone (if you\u2019ve connected SMS), and their number streams onto your screen.",
+   steps:[{t:"Show the \u201cunlock your discount\u201d join code."},{t:"People enter their number for the \u2018coupon\u2019."},{t:"A text hits their phone instantly; numbers appear on screen."},{t:"Reveal on screen and freeze: a stranger just texted them."}],
+   freeze:"You handed your number to a stranger because a shop screen dangled a discount \u2014 and seconds later they texted you. That number is all a scammer needs to start.",
+   safety:"Internal use \u2014 full numbers are shown on your screen and wiped on reset. A real SMS only sends if YOU connect a messaging service (config.js \u2192 hook)."},
 
-  {id:"phish", num:"03", title:"The Login Trap",
+  {id:"otp", num:"03", title:"Share the Code",
+   goal:"The checkout asks people for \u201cthe 6-digit code we just sent\u201d to confirm their order. Watch the room hand over OTPs to a stranger \u2014 live \u2014 then reveal that an OTP is the one thing you never share.",
+   steps:[{t:"Show the \u201cconfirm your order\u201d join code."},{t:"People type any code to \u2018verify\u2019."},{t:"Codes stream onto the screen as they\u2019re shared."},{t:"Reveal: never share an OTP \u2014 with anyone, ever."}],
+   freeze:"An OTP is a key to your account or your money. Banks, shops and delivery agents never need it \u2014 anyone who asks for the code is the scammer. Never read it out, never type it into a link.",
+   safety:"Internal use \u2014 the codes typed are shown on your screen and wiped on reset. They\u2019re not real OTPs; it\u2019s a simulation."},
+
+  {id:"phish", num:"04", title:"The Login Trap",
    goal:"A convincing \u201cverify your account\u201d page opens on every phone. As people type, their entries appear on your screen in real time \u2014 the exact view a phishing site\u2019s operator gets.",
    steps:[{t:"Tell the room: type a FAKE name + password."},{t:"Show the join code; they open the \u2018login\u2019."},{t:"Watch entries land on screen as they type."},{t:"Reveal: everything they typed was captured."}],
    freeze:"A page that looks like your bank is not your bank. The moment you type into it, a stranger has it \u2014 you watched it happen on this screen.",
    safety:"Internal use \u2014 everything typed is shown in full on your screen. Ask people to type FAKE details so no real credential ends up on the projector."},
 
-  {id:"vote", num:"04", title:"Vote the Room",
+  {id:"vote", num:"05", title:"Vote the Room",
    goal:"Show a real-looking message; the whole room votes Safe or Scam from their phones. The bar moves live, then you reveal the answer and the red flags. Five rounds, one room score.",
    steps:[{t:"Read each message on the screen aloud."},{t:"Everyone votes Safe / Scam on their phone."},{t:"Reveal the answer and the red flags."},{t:"Next round; end on the room\u2019s score."}],
    freeze:"Scams almost always pair pressure with a link or a payment. Genuine messages rarely do both \u2014 that single test catches most of them.",
    safety:"Illustrative messages only; none of the links are real."},
 
-  {id:"crack", num:"05", title:"Crack the Room",
-   goal:"Everyone types a sample password on their phone and watches its crack-time on a live leaderboard. The weakest in the room sits at the top \u2014 then you build a strong passphrase together and watch it jump to centuries.",
-   steps:[{t:"Ask everyone to type a SAMPLE password (never a real one)."},{t:"Crack-times appear on a live leaderboard."},{t:"Point out the weakest \u2014 cracked instantly."},{t:"Build a long passphrase; re-submit; watch it soar."}],
+  {id:"crack", num:"06", title:"Crack the Room",
+   goal:"Everyone types a sample password on their phone and it climbs a live ranking \u2014 the <b>strongest</b> password takes 1st place. A fun, competitive finish that shows what \u2018strong\u2019 really means.",
+   steps:[{t:"Ask everyone to type a SAMPLE password (never a real one)."},{t:"Crack-times rank them \u2014 strongest at the top."},{t:"Crown the leader; show the weakest cracked instantly."},{t:"Challenge them: a long passphrase beats everything."}],
    freeze:"Length beats complexity, and reuse is the real danger \u2014 one breach unlocks every account that shared that password. Long, unique, and a password manager.",
    safety:"Internal use \u2014 the full sample password is shown on your screen. Ask people to type a SAMPLE, never a real password."}
 ];
@@ -2764,7 +2794,7 @@ function goHome(){
     <section class="hero">
       <div class="kick">Live audience console</div>
       <h1>Scam the room, <span class="g">safely.</span></h1>
-      <p>One session, one QR. The whole audience joins once from their phones, then every phone follows along automatically as you move through all five demos \u2014 clicks, numbers, votes and passwords landing on your screen live.</p>
+      <p>One session, one QR. The whole audience joins once from their phones, then every phone follows along automatically as you move through all six demos \u2014 clicks, numbers, votes and passwords landing on your screen live.</p>
       <div class="howto">
         <div class="pill"><span class="s">1</span><span>Start a session \u2014 <b>one QR</b> appears</span></div>
         <div class="pill"><span class="s">2</span><span>The room <b>scans once</b></span></div>
@@ -2947,12 +2977,35 @@ DSHOW.crack=(main,root,idx)=>{
   if(!list.length){
     body=`<div class="empty"><div class="big">\ud83d\udd10</div><div>Waiting for the first password<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">Remind the room: type a SAMPLE, never a real one.</div></div>`;
   }else{
-    list.sort((a,b)=>a.sec-b.sec);
-    const rows=list.map((p,i)=>{ const cls=i===0?'weak':(p.sec>3155760000?'strong':'');
-      return `<div class="brow ${cls}"><div class="rk">${i+1}</div><div class="pw">${esc(p.pw||p.m||'')}</div><div class="yr">${esc(p.label)}${i===0?' \u2190 weakest':''}</div></div>`; }).join('');
-    body=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter" style="font-size:clamp(30px,6vw,46px)">${list.length}</div><div class="counterlab">passwords on the board \u00b7 weakest on top</div></div><div class="board">${rows}</div>`;
+    list.sort((a,b)=>b.sec-a.sec);                               // STRONGEST first
+    const medals=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];  // 🥇🥈🥉
+    const rows=list.map((p,i)=>{
+      const top=i<3, last=i===list.length-1 && list.length>1;
+      const cls=(i===0?'win':'')+(last?' weak':'');
+      const rank=top?`<span class="medal">${medals[i]}</span>`:`<span class="rk">${i+1}</span>`;
+      const note=i===0?' \u2190 strongest \ud83c\udfc6':(last?' \u2190 weakest':'');
+      return `<div class="brow rankrow ${cls}">${rank}<div class="pw">${esc(p.pw||p.m||'')}</div><div class="yr">${esc(p.label)}${note}</div></div>`; }).join('');
+    body=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter safe" style="font-size:clamp(30px,6vw,46px)">${list.length}</div><div class="counterlab">in the ranking \u00b7 strongest wins \ud83c\udfc6</div></div><div class="board">${rows}</div>`;
   }
-  panel(main,'Live crack-time leaderboard', body, '<button class="btn ghost" id="reset">Clear board</button>');
+  panel(main,'Strongest-password ranking', body, '<button class="btn ghost" id="reset">Clear board</button>');
+  main.querySelector('#reset').onclick=()=>demoReset(idx);
+};
+
+DSHOW.otp=(main,root,idx)=>{
+  const d=root['d'+idx]||{}, codes=d.otp?Object.values(d.otp):[], revealed=!!d.revealed;
+  let body;
+  if(!codes.length){
+    body=`<div class="empty"><div class="big">\ud83d\udd22</div><div>Waiting for the first code<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">\u201cConfirm your order \u2014 enter the code we sent.\u201d</div></div>`;
+  }else{
+    const rows=codes.slice().sort((a,b)=>b.t-a.t).map(c=>`<div class="feedrow"><div class="av">\ud83d\udd11</div>
+      <div class="main"><div class="a"><span class="reveal-val">${esc(c.code||'\u2014')}</span></div><div class="b">shared their \u201cverification code\u201d with a stranger</div></div>
+      <div class="tag">handed over</div></div>`).join('');
+    body=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter scam" style="font-size:clamp(32px,7vw,52px)">${codes.length}</div><div class="counterlab">people shared a code with a stranger</div></div>
+      ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED TO EVERYONE</div>':''}<div class="feed">${rows}</div>`;
+  }
+  panel(main,'Codes coming in (never share these!)', body,
+    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
+  main.querySelector('#reveal').onclick=()=>LIVE.set('s/'+show.code+'/d'+idx+'/revealed',true);
   main.querySelector('#reset').onclick=()=>demoReset(idx);
 };
 
@@ -2992,9 +3045,10 @@ let autoAdvance=true, autoTimer=null, autoIdx=null, autoLeft=0;
 function clearAuto(){ if(autoTimer){clearInterval(autoTimer);autoTimer=null;} autoIdx=null; autoLeft=0; }
 function demoComplete(cur,root){
   if(cur<0||cur>=STATIONS.length-1) return false;   // never auto on the last demo
-  const d=root['d'+cur]||{};
-  if(cur===3) return !!d.done;                       // vote: after the score
-  return !!d.revealed;                               // click/number/phish: after reveal
+  const d=root['d'+cur]||{}, id=STATIONS[cur].id;
+  if(id==='vote') return !!d.done;                   // vote: after the score
+  if(id==='crack') return false;                     // ranking has no reveal
+  return !!d.revealed;                               // click / number / otp / phish: after reveal
 }
 function updateAuto(cur,root){
   if(!autoAdvance){ clearAuto(); return; }
@@ -3025,7 +3079,9 @@ function participantApp(code){
     if(c>=STATIONS.length){ if(sig!=='done'){sig='done'; root.innerHTML=thanksPhone();} return; }
     const station=STATIONS[c], d=data['d'+c]||{};
     const revealed=!!d.revealed, round=d.round||0, sub=submitted['d'+c]||null;
-    const newSig=[c,revealed,round,JSON.stringify(sub)].join('|');
+    let dyn='';
+    if(station.id==='crack' && sub && sub.done){ dyn='|'+(d.pwd?Object.keys(d.pwd).length:0); }   // live rank updates
+    const newSig=[c,revealed,round,JSON.stringify(sub)].join('|')+dyn;
     if(newSig===sig) return;
     sig=newSig;
     PVIEW[station.id](root,{ code, data, d, demo:station.id, idx:c, revealed, round, me,
@@ -3048,41 +3104,75 @@ function lobbyPhone(code){
 function thanksPhone(){
   return `<div class="pv">${shellHead()}<div class="pv-reveal" style="background:linear-gradient(180deg,#0f2c24,#08130f)">
     <div class="ic">\u2705</div><h1 class="g">Thank you!</h1><div class="big2">That\u2019s the end of the session.</div>
-    <p>Five quick lessons in how easily a scam works. <b>Stop \u00b7 Think \u00b7 Verify</b> \u2014 and never act on a link, prize, or OTP you didn\u2019t ask for.</p></div></div>`;
+    <p>Six quick lessons in how easily a scam works. <b>Stop \u00b7 Think \u00b7 Verify</b> \u2014 and never act on a link, prize, or OTP you didn\u2019t ask for.</p></div></div>`;
 }
 
 const PVIEW={};
 
 /* 01 click */
 PVIEW.click=(root,ctx)=>{
-  if(ctx.revealed){ root.innerHTML=beware(); return; }
+  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Beware!','That \u201cdeal\u201d was the bait.','You just opened a stranger\u2019s shopping link \u2014 in a room about scams. A real one could install malware or steal your login. <b>Too-good-to-be-true prices are the hook. Stop \u00b7 Think \u00b7 Verify.</b>'); return; }
   if(ctx.submitted&&ctx.submitted.done){
-    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>You\u2019re in!</h2><p>Hang on \u2014 look up at the big screen.</p></div></div>`; return;
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Opening the deal\u2026</h2><p>Hang on \u2014 look up at the big screen.</p></div></div>`; return;
   }
-  root.innerHTML=`<div class="pv"><div class="pv-bait"><div class="gift">\ud83c\udf81</div><h1>You\u2019ve won a reward!</h1><p>A \u20b91,000 voucher is waiting for you.</p><p style="font-size:13px">Tap below to verify and claim instantly.</p>
-    <button class="pv-btn bait" id="claim">Verify &amp; claim now</button></div></div>`;
+  root.innerHTML=`<div class="pv"><div class="pv-shop">
+    <div class="shopbar"><span class="shoplogo">\ud83d\uded2 ShopKart</span><span class="shopflash">\u26a1 FLASH SALE</span></div>
+    <div class="shopimg">\ud83c\udfa7</div>
+    <div class="shopbody">
+      <div class="shopname">Wireless Earbuds Pro</div>
+      <div class="shopprice"><span class="now">\u20b9499</span><span class="was">\u20b94,999</span><span class="off">90% OFF</span></div>
+      <div class="shopstock">\ud83d\udd25 Only 3 left \u00b7 sale ends in 04:59</div>
+      <button class="pv-btn shop" id="claim">Grab this deal \u2192</button>
+    </div></div></div>`;
   root.querySelector('#claim').onclick=()=>{ LIVE.set(ctx.p('click/'+ctx.me),{t:Date.now()}); ctx.setSubmitted({done:true}); };
 };
 
 /* 02 number */
 PVIEW.number=(root,ctx)=>{
-  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Gotcha.','That number is gone.','You just gave your phone number to a stranger because a screen promised a prize. <b>That\u2019s all a scammer needs to start.</b> Never hand your number to claim something you didn\u2019t enter.'); return; }
+  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Gotcha.','That number is gone.','You handed your phone number to a stranger for a \u201cdiscount.\u201d <b>That\u2019s all a scammer needs to start.</b> Real shops don\u2019t need your number to show you a price.'); return; }
   if(ctx.submitted&&ctx.submitted.done){
     const texted=!!(CFG.hook||'').trim();
-    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Registered!</h2><p>${texted?'\ud83d\udc40 Check your text messages\u2026':'Your entry is in. Watch the big screen.'}</p></div></div>`; return;
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Coupon unlocked!</h2><p>${texted?'\ud83d\udc40 Check your text messages\u2026':'Done \u2014 watch the big screen.'}</p></div></div>`; return;
   }
-  root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-body">
-    <h2>\ud83c\udf89 Claim your \u20b92,000 voucher</h2><p class="sub">Limited offer \u2014 just register your mobile number and we\u2019ll text you the voucher right away.</p>
-    <div class="pv-flabel">Mobile number</div>
-    <input class="pv-field" id="num" inputmode="tel" placeholder="9876543210" autocomplete="off">
-    <button class="pv-btn go" id="go">Claim my voucher</button>
-    <div class="pv-note">By tapping you\u2019ll see why this was a test \u2014 nothing is charged.</div>
-  </div></div>`;
+  root.innerHTML=`<div class="pv"><div class="pv-shop">
+    <div class="shopbar"><span class="shoplogo">\ud83d\uded2 ShopKart</span><span class="shopflash" style="background:var(--safe);color:#06231a">\ud83c\udf81 OFFER</span></div>
+    <div class="shopbody" style="padding-top:24px">
+      <div class="shopname" style="font-size:22px">Get \u20b9500 OFF your first order</div>
+      <p class="sub">Enter your mobile number and we\u2019ll <b>SMS your coupon code</b> instantly. Limited to today only.</p>
+      <div class="pv-flabel">Mobile number</div>
+      <input class="pv-field" id="num" inputmode="tel" placeholder="9876543210" autocomplete="off">
+      <button class="pv-btn shop" id="go" style="background:var(--safe);color:#06231a">Unlock my coupon</button>
+      <div class="pv-note">By tapping you\u2019ll see why this was a test \u2014 nothing is charged.</div>
+    </div></div></div>`;
   const inp=root.querySelector('#num');
   root.querySelector('#go').onclick=()=>{
     const v=inp.value.trim(); if(v.replace(/\D/g,'').length<6){ inp.style.borderColor='var(--scam)'; inp.focus(); return; }
     LIVE.set(ctx.p('numbers/'+ctx.me),{n:v,t:Date.now()});
     sendHook(v, SMS_MSG);
+    ctx.setSubmitted({done:true});
+  };
+};
+
+/* 03 otp \u2014 share the code */
+PVIEW.otp=(root,ctx)=>{
+  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Never share a code.','You just gave your OTP to a stranger.','That 6-digit code is the key to your account or your payment. <b>Banks, shops and \u201cdelivery agents\u201d never need it.</b> Anyone who asks for your OTP \u2014 by call, SMS or screen \u2014 is the scammer.'); return; }
+  if(ctx.submitted&&ctx.submitted.done){
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Confirming\u2026</h2><p>Please wait \u2014 look at the big screen.</p></div></div>`; return;
+  }
+  root.innerHTML=`<div class="pv"><div class="pv-shop">
+    <div class="shopbar"><span class="shoplogo">\ud83d\uded2 ShopKart</span><span class="shopflash" style="background:#1b66c9;color:#fff">CHECKOUT</span></div>
+    <div class="shopbody" style="padding-top:24px">
+      <div class="shopname" style="font-size:22px">Confirm your order</div>
+      <p class="sub">We sent a <b>6-digit code</b> to your phone. Enter it to confirm payment of <b>\u20b9499</b> and complete your order.</p>
+      <div class="pv-flabel">Verification code</div>
+      <input class="pv-field" id="otp" inputmode="numeric" maxlength="6" placeholder="\u2022 \u2022 \u2022 \u2022 \u2022 \u2022" autocomplete="off" style="letter-spacing:.4em;text-align:center;font-size:22px">
+      <button class="pv-btn shop" id="go" style="background:#1b66c9;color:#fff">Confirm &amp; pay</button>
+      <div class="pv-note">Type any 6 digits \u2014 you\u2019ll see why this was a test.</div>
+    </div></div></div>`;
+  const inp=root.querySelector('#otp');
+  root.querySelector('#go').onclick=()=>{
+    const v=inp.value.replace(/\D/g,'').slice(0,6); if(v.length<4){ inp.style.borderColor='var(--scam)'; inp.focus(); return; }
+    LIVE.set(ctx.p('otp/'+ctx.me),{code:v,t:Date.now()});
     ctx.setSubmitted({done:true});
   };
 };
@@ -3135,14 +3225,29 @@ PVIEW.vote=(root,ctx)=>{
   });
 };
 
-/* 05 crack */
+/* 06 crack — strongest-password ranking */
 PVIEW.crack=(root,ctx)=>{
+  if(ctx.submitted&&ctx.submitted.done){
+    const list=ctx.d&&ctx.d.pwd?Object.values(ctx.d.pwd):[];
+    list.sort((a,b)=>b.sec-a.sec);
+    const mine=(ctx.d&&ctx.d.pwd&&ctx.d.pwd[ctx.me])||{sec:ctx.submitted.sec,label:ctx.submitted.label};
+    let rank=list.findIndex(x=>x===ctx.d.pwd[ctx.me]); if(rank<0){ rank=list.filter(x=>x.sec>(mine.sec||0)).length; }
+    const pos=rank+1, n=Math.max(list.length,1), first=pos===1;
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-reveal" style="background:linear-gradient(180deg,${first?'#10271f,#08130f':'#13242e,#080f14'})">
+      <div class="ic">${first?'\ud83c\udfc6':'\ud83d\udd10'}</div>
+      <div class="rankbig ${first?'g':''}">#${pos}<span class="ranktot"> / ${n}</span></div>
+      <div class="big2">${first?'Strongest in the room \u2014 for now!':'You\u2019re on the ranking'}</div>
+      <p>Your password would take <b>${esc(mine.label||'\u2014')}</b> to crack. Think you can top the leaderboard? Longer beats everything.</p>
+      <button class="pv-btn go" id="again" style="max-width:280px">Try a stronger one</button></div></div>`;
+    root.querySelector('#again').onclick=()=>ctx.setSubmitted(null);
+    return;
+  }
   root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-body">
-    <h2>How strong is it?</h2><p class="sub">Type a <b>sample</b> password (never a real one) and watch how long it survives an attack.</p>
+    <h2>\ud83c\udfc6 Strongest password wins</h2><p class="sub">Type a <b>sample</b> password (never a real one) and climb the live ranking on the big screen.</p>
     <input class="pv-field" id="pw" autocomplete="off" placeholder="type here\u2026">
     <div class="pv-meter"><div class="f" id="mf"></div></div>
     <div class="pv-crack" id="ct">\u2014</div><div class="pv-cracklab">time to crack</div>
-    <button class="pv-btn go" id="go">Put it on the board</button>
+    <button class="pv-btn go" id="go">Enter the ranking</button>
     <div class="pv-note" id="note">What you type appears on the big screen \u2014 use a <b>sample</b>, never a real password.</div>
   </div></div>`;
   const inp=root.querySelector('#pw'), mf=root.querySelector('#mf'), ct=root.querySelector('#ct');
@@ -3154,7 +3259,7 @@ PVIEW.crack=(root,ctx)=>{
     const v=inp.value; if(!v){ inp.focus(); return; }
     const c=crack(v);
     LIVE.set(ctx.p('pwd/'+ctx.me),{pw:v.slice(0,64),m:maskPw(v),label:c.label,sec:c.sec,t:Date.now()});
-    root.querySelector('#note').innerHTML='<b style="color:var(--safe)">On the board!</b> Try a longer passphrase and add it again to watch it climb.';
+    ctx.setSubmitted({done:true,sec:c.sec,label:c.label});
   };
 };
 

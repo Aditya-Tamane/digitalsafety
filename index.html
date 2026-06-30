@@ -100,6 +100,7 @@
   .feedrow .main{flex:1;min-width:0}
   .feedrow .main .a{font-family:var(--mono);font-size:15px;word-break:break-all}
   .feedrow .main .b{font-size:12px;color:var(--faint);margin-top:2px}
+  .feedrow .main .b .reveal-val{font-family:var(--mono);color:var(--scam);background:#2a0f0b;border:1px solid #5a2b22;border-radius:6px;padding:1px 7px;font-size:13px;word-break:break-all}
   .feedrow .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--scam);flex:none}
   .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--faint);gap:10px;padding:24px}
   .empty .big{font-size:34px}
@@ -200,10 +201,70 @@
   .pv-crack{font-family:var(--mono);font-size:clamp(24px,8vw,40px);font-weight:800;text-align:center;line-height:1.1;margin-top:6px}
   .pv-cracklab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:center;margin-top:6px}
   .pv-note{font-size:12.5px;color:var(--faint);text-align:center;margin-top:16px}
-  .pv-bait{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 26px;background:linear-gradient(180deg,#191235,#0d0a1c);min-height:100dvh}
+  .pv-bait{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 26px;background:linear-gradient(180deg,#191235,#0d0a1c);min-height:0}
   .pv-bait .gift{font-size:60px}
   .pv-bait h1{font-size:28px;font-weight:800;margin:14px 0 4px}
   .pv-bait p{color:#b9b2d6;margin:0 0 4px}
+
+  /* ---------- single-session show ---------- */
+  .show{display:grid;grid-template-columns:1fr;gap:18px;margin-top:14px}
+  @media(min-width:820px){.show{grid-template-columns:316px 1fr}}
+  .showside{background:rgba(16,28,36,.72);border:1px solid var(--line-soft);border-radius:20px;padding:22px;text-align:center;align-self:start}
+  @media(min-width:820px){.showside{position:sticky;top:84px}}
+  .showside .lab{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:14px}
+  .joined{margin-top:16px;border-top:1px solid var(--line-soft);padding-top:14px;font-family:var(--mono);font-size:13px;color:var(--safe)}
+  .joined b{color:var(--text);font-size:16px}
+  .showmain{min-height:min(62vh,540px);background:radial-gradient(700px 460px at 50% 8%,#13242e,#080f14 70%);border:1px solid var(--line-soft);border-radius:20px;padding:24px;display:flex;position:relative;overflow:hidden}
+  .showmain::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 280px at 50% 0%,#ffb02e10,transparent);pointer-events:none}
+  .livepanel.solo{flex:1;background:none;border:none;padding:0;min-height:auto;position:relative;z-index:1}
+  .lobbybox{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;position:relative;z-index:1}
+  .lobbybox .big{font-size:50px}
+  .lobbybox h2{font-size:clamp(22px,4vw,30px);margin:0;font-weight:800}
+  .lobbybox .subtext{max-width:42ch}
+  .showbar{position:sticky;bottom:12px;margin-top:18px;display:flex;align-items:center;gap:12px;justify-content:space-between;background:rgba(10,18,24,.86);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:11px 14px;flex-wrap:wrap}
+  .showbar .navbtns{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .dots{display:flex;gap:7px;flex:1;justify-content:center}
+  .dots .d{width:9px;height:9px;border-radius:50%;background:var(--line);transition:.2s}
+  .dots .d.on{background:var(--beacon);box-shadow:0 0 0 3px #ffb02e22}
+  .dots .d.done{background:var(--safe)}
+  .advlabel{font-family:var(--mono);font-size:12px;color:var(--demo)}
+  .toggle{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:none}
+  .toggle.on{color:var(--safe);border-color:#1f4a3c;background:#10271f}
+
+  /* ---------- participant phone frame + backdrop ---------- */
+  body.participant{background:radial-gradient(900px 620px at 50% -8%,#102230,#05080b 72%);min-height:100dvh}
+  body.participant #root{width:100%;min-height:100dvh;display:flex;justify-content:center;align-items:stretch}
+  body.participant .pv{width:100%;max-width:440px;background:var(--bg)}
+  @media(min-width:480px){
+    body.participant{display:flex;justify-content:center;align-items:center;padding:24px}
+    body.participant #root{min-height:auto;align-items:center}
+    body.participant .pv{min-height:min(880px,calc(100dvh - 48px));max-height:calc(100dvh - 48px);border-radius:42px;border:1px solid #22394a;box-shadow:0 50px 110px -30px #000,inset 0 0 0 9px #0a1016;overflow:hidden}
+    body.participant .pv::after{content:"";position:absolute;top:14px;left:50%;transform:translateX(-50%);width:120px;height:7px;border-radius:99px;background:#0a1016;z-index:9;pointer-events:none}
+    body.participant .pv-head{padding-top:26px}
+  }
+  /* ---------- shopping bait screens (participant) ---------- */
+  .pv-shop{flex:1;display:flex;flex-direction:column;background:#0b0f14;min-height:0}
+  .shopbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#10161d;border-bottom:1px solid var(--line-soft)}
+  .shoplogo{font-weight:800;font-size:17px;color:var(--text)}
+  .shopflash{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;background:var(--beacon);color:#1c1300;padding:5px 10px;border-radius:999px}
+  .shopimg{font-size:120px;text-align:center;padding:34px 0 10px;background:radial-gradient(300px 160px at 50% 30%,#16242e,transparent)}
+  .shopbody{padding:18px 22px 30px;display:flex;flex-direction:column;flex:1}
+  .shopname{font-size:24px;font-weight:800;line-height:1.15}
+  .shopprice{display:flex;align-items:baseline;gap:10px;margin:12px 0}
+  .shopprice .now{font-size:30px;font-weight:800;color:var(--safe)}
+  .shopprice .was{font-size:16px;color:var(--faint);text-decoration:line-through}
+  .shopprice .off{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--scam);background:var(--scam-d);border:1px solid #5a2b22;border-radius:6px;padding:2px 8px}
+  .shopstock{font-size:13px;color:var(--demo);margin-bottom:18px}
+  .pv-btn.shop{margin-top:auto;background:var(--beacon);color:#1c1300}
+
+  /* ---------- ranking podium (presenter leaderboard) ---------- */
+  .brow.rankrow .medal{font-size:22px;width:26px;flex:none;text-align:center}
+  .brow.win{border-color:var(--safe);background:linear-gradient(90deg,#10271f,#0a141a);box-shadow:0 0 0 1px #1f4a3c}
+  .brow.win .pw{color:var(--safe)}
+  .brow.win .yr{color:var(--safe);font-weight:700}
+  .rankbig{font-family:var(--mono);font-weight:800;font-size:64px;line-height:1;color:var(--beacon)}
+  .rankbig.g{color:var(--safe)}
+  .rankbig .ranktot{font-size:24px;color:var(--faint);font-weight:700}
 
   .spinner{width:38px;height:38px;border:3px solid #ffffff20;border-top-color:var(--beacon);border-radius:50%;animation:spin .8s linear infinite;margin:auto}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -2666,45 +2727,52 @@ const VOTE_ROUNDS=[
 
 const STATIONS=[
   {id:"click", num:"01", title:"Would You Click?",
-   goal:"Put a tempting link on the screen. Watch how many of the people in the room open it on their own phones \u2014 live \u2014 then drop the \u201cBeware\u201d on every device at once.",
+   goal:"Put a tempting \u201cflash sale\u201d deal on the screen. Watch how many people open it on their own phones \u2014 live \u2014 then drop the \u201cBeware\u201d on every device at once.",
    steps:[{t:"Show the QR / join code on the big screen."},{t:"Ask everyone to scan or type the code."},{t:"Watch the click counter climb in real time."},{t:"Hit \u201cReveal to all phones\u201d \u2014 every phone flips to a warning."}],
-   freeze:"Everyone who tapped just trusted a stranger\u2019s link \u2014 in a room literally about scams. That reflex is exactly what fraudsters count on. Stop \u00b7 Think \u00b7 Verify.",
+   freeze:"Everyone who tapped just trusted a stranger\u2019s deal \u2014 in a room literally about scams. That reflex is exactly what fraudsters count on. Stop \u00b7 Think \u00b7 Verify.",
    safety:"Nothing is collected and nothing real happens \u2014 the phones only show a warning you control from this screen."},
 
   {id:"number", num:"02", title:"Just Your Number",
-   goal:"\u201cWin a voucher \u2014 just register your number.\u201d The moment someone submits, a real text lands on their phone (if you\u2019ve connected SMS), and their number streams onto your screen.",
-   steps:[{t:"Show the \u201cclaim your voucher\u201d join code."},{t:"People enter their number to \u2018claim\u2019."},{t:"A text hits their phone instantly; numbers appear on screen (masked)."},{t:"Reveal on screen and freeze: a stranger just texted them."}],
-   freeze:"You handed your number to a stranger because a screen dangled a prize \u2014 and seconds later they texted you. That number is all a scammer needs to start.",
-   safety:"Numbers show masked on screen and are wiped when you reset. A real SMS only sends if YOU connect a messaging service (config.js \u2192 hook); otherwise it\u2019s an on-screen reveal."},
+   goal:"\u201cUnlock the coupon \u2014 just enter your number.\u201d The moment someone submits, a real text lands on their phone (if you\u2019ve connected SMS), and their number streams onto your screen.",
+   steps:[{t:"Show the \u201cunlock your discount\u201d join code."},{t:"People enter their number for the \u2018coupon\u2019."},{t:"A text hits their phone instantly; numbers appear on screen."},{t:"Reveal on screen and freeze: a stranger just texted them."}],
+   freeze:"You handed your number to a stranger because a shop screen dangled a discount \u2014 and seconds later they texted you. That number is all a scammer needs to start.",
+   safety:"Internal use \u2014 full numbers are shown on your screen and wiped on reset. A real SMS only sends if YOU connect a messaging service (config.js \u2192 hook)."},
 
-  {id:"phish", num:"03", title:"The Login Trap",
+  {id:"otp", num:"03", title:"Share the Code",
+   goal:"The checkout asks people for \u201cthe 6-digit code we just sent\u201d to confirm their order. Watch the room hand over OTPs to a stranger \u2014 live \u2014 then reveal that an OTP is the one thing you never share.",
+   steps:[{t:"Show the \u201cconfirm your order\u201d join code."},{t:"People type any code to \u2018verify\u2019."},{t:"Codes stream onto the screen as they\u2019re shared."},{t:"Reveal: never share an OTP \u2014 with anyone, ever."}],
+   freeze:"An OTP is a key to your account or your money. Banks, shops and delivery agents never need it \u2014 anyone who asks for the code is the scammer. Never read it out, never type it into a link.",
+   safety:"Internal use \u2014 the codes typed are shown on your screen and wiped on reset. They\u2019re not real OTPs; it\u2019s a simulation."},
+
+  {id:"phish", num:"04", title:"The Login Trap",
    goal:"A convincing \u201cverify your account\u201d page opens on every phone. As people type, their entries appear on your screen in real time \u2014 the exact view a phishing site\u2019s operator gets.",
    steps:[{t:"Tell the room: type a FAKE name + password."},{t:"Show the join code; they open the \u2018login\u2019."},{t:"Watch entries land on screen as they type."},{t:"Reveal: everything they typed was captured."}],
    freeze:"A page that looks like your bank is not your bank. The moment you type into it, a stranger has it \u2014 you watched it happen on this screen.",
-   safety:"Ask people to use fake details. Passwords are never stored \u2014 the screen only shows the length, to prove capture without exposing anyone."},
+   safety:"Internal use \u2014 everything typed is shown in full on your screen. Ask people to type FAKE details so no real credential ends up on the projector."},
 
-  {id:"vote", num:"04", title:"Vote the Room",
+  {id:"vote", num:"05", title:"Vote the Room",
    goal:"Show a real-looking message; the whole room votes Safe or Scam from their phones. The bar moves live, then you reveal the answer and the red flags. Five rounds, one room score.",
    steps:[{t:"Read each message on the screen aloud."},{t:"Everyone votes Safe / Scam on their phone."},{t:"Reveal the answer and the red flags."},{t:"Next round; end on the room\u2019s score."}],
    freeze:"Scams almost always pair pressure with a link or a payment. Genuine messages rarely do both \u2014 that single test catches most of them.",
    safety:"Illustrative messages only; none of the links are real."},
 
-  {id:"crack", num:"05", title:"Crack the Room",
-   goal:"Everyone types a sample password on their phone and watches its crack-time on a live leaderboard. The weakest in the room sits at the top \u2014 then you build a strong passphrase together and watch it jump to centuries.",
-   steps:[{t:"Ask everyone to type a SAMPLE password (never a real one)."},{t:"Crack-times appear on a live leaderboard."},{t:"Point out the weakest \u2014 cracked instantly."},{t:"Build a long passphrase; re-submit; watch it soar."}],
+  {id:"crack", num:"06", title:"Crack the Room",
+   goal:"Everyone types a sample password on their phone and it climbs a live ranking \u2014 the <b>strongest</b> password takes 1st place. A fun, competitive finish that shows what \u2018strong\u2019 really means.",
+   steps:[{t:"Ask everyone to type a SAMPLE password (never a real one)."},{t:"Crack-times rank them \u2014 strongest at the top."},{t:"Crown the leader; show the weakest cracked instantly."},{t:"Challenge them: a long passphrase beats everything."}],
    freeze:"Length beats complexity, and reuse is the real danger \u2014 one breach unlocks every account that shared that password. Long, unique, and a password manager.",
-   safety:"Never type a real password. Only a masked hint and the crack-time reach the screen \u2014 never the password itself."}
+   safety:"Internal use \u2014 the full sample password is shown on your screen. Ask people to type a SAMPLE, never a real password."}
 ];
 const byId=id=>STATIONS.find(s=>s.id===id);
 
 /* ============================================================
    PRESENTER CONSOLE
    ============================================================ */
-let unsub=null, sess=null;
-function clearLive(){ if(unsub){unsub();unsub=null;} }
+let unsub=null, show=null;
+function clearLive(){ if(unsub){unsub();unsub=null;} clearAuto(); }
 
 function presenterApp(){
   clearLive();
+  document.body.classList.remove('participant');
   document.getElementById('root').innerHTML='<div class="topbar" id="topbar"></div><div class="wrap" id="app"></div>';
   buildSetupSheet();
   goHome();
@@ -2717,7 +2785,7 @@ function statusPill(){
 }
 
 function goHome(){
-  clearLive(); sess=null; closeSheets(); window.scrollTo(0,0);
+  clearLive(); show=null; closeSheets(); window.scrollTo(0,0);
   document.getElementById('topbar').innerHTML=
     `<span class="tb-title">Digital Safety Console</span><span class="tb-sub">\u00b7 Antrisha Foundation</span>
      <span class="tb-spacer"></span>${statusPill()}
@@ -2726,218 +2794,271 @@ function goHome(){
     <section class="hero">
       <div class="kick">Live audience console</div>
       <h1>Scam the room, <span class="g">safely.</span></h1>
-      <p>Five demos the whole audience joins from their own phones. They scan a code, you watch their clicks, numbers and votes land on screen in real time \u2014 then you reveal, together, exactly how easily it happened. Tap a demo to open a live session.</p>
+      <p>One session, one QR. The whole audience joins once from their phones, then every phone follows along automatically as you move through all six demos \u2014 clicks, numbers, votes and passwords landing on your screen live.</p>
       <div class="howto">
-        <div class="pill"><span class="s">1</span><span>Open a demo \u2014 a <b>join code &amp; QR</b> appear</span></div>
-        <div class="pill"><span class="s">2</span><span>The room <b>scans</b> with their phones</span></div>
-        <div class="pill"><span class="s">3</span><span>Their actions show up <b>live</b>, then you reveal</span></div>
+        <div class="pill"><span class="s">1</span><span>Start a session \u2014 <b>one QR</b> appears</span></div>
+        <div class="pill"><span class="s">2</span><span>The room <b>scans once</b></span></div>
+        <div class="pill"><span class="s">3</span><span>Run the demos \u2014 phones <b>follow automatically</b></span></div>
       </div>
+      <div style="margin-top:24px"><button class="btn primary" id="startBtn" style="font-size:16px;padding:15px 26px">\u25b6 Start live session</button></div>
     </section>
+    <div class="kick" style="margin:30px 0 4px">What's inside \u00b7 tap to jump</div>
     <div class="grid">
-      ${STATIONS.map(s=>`<button class="card" data-id="${s.id}">
+      ${STATIONS.map((s,i)=>`<button class="card" data-i="${i}">
         <div class="top"><span class="n">${s.num}</span><span class="play">\u25b6 live \u00b7 audience</span></div>
         <h3>${esc(s.title)}</h3><p>${esc(s.goal)}</p></button>`).join('')}
     </div>`;
   document.getElementById('setupBtn').onclick=openSetup;
-  document.querySelectorAll('.card').forEach(b=>b.onclick=()=>openStation(b.dataset.id));
+  document.getElementById('startBtn').onclick=()=>startShow(-1);
+  document.querySelectorAll('.card').forEach(b=>b.onclick=()=>startShow(+b.dataset.i));
 }
 
-function openStation(id){
+/* ---- one persistent session for the whole run ---- */
+function startShow(start){
   clearLive(); closeSheets(); window.scrollTo(0,0);
-  const s=byId(id), i=STATIONS.indexOf(s);
-  sess={code:genCode(), demo:id};
-  // (re)initialise this session's room
-  LIVE.set('s/'+sess.code, {meta:{demo:id, ts:Date.now()}, phase:'collect', round:0, revealed:false});
+  show={code:genCode(), cur:start};
+  LIVE.set('s/'+show.code,{meta:{ts:Date.now()},cur:start});
+  buildShowUI();
+}
 
+function buildShowUI(){
+  const code=show.code;
   document.getElementById('topbar').innerHTML=`
-    <button class="tb-btn" id="home" title="All demos">\u2302</button>
-    <button class="tb-btn" id="prev" ${i===0?'disabled':''} title="Previous">\u2039</button>
-    <button class="tb-btn" id="next" ${i===STATIONS.length-1?'disabled':''} title="Next">\u203a</button>
-    <div style="margin-left:6px"><div class="tb-title">${esc(s.title)}</div><div class="tb-sub">Demo ${s.num} of ${STATIONS.length}</div></div>
+    <button class="tb-btn" id="home" title="End session">\u2302</button>
+    <div style="margin-left:6px"><div class="tb-title" id="showtitle">Lobby</div><div class="tb-sub" id="showsub">Waiting room</div></div>
     <span class="tb-spacer"></span>${statusPill()}
     <button class="tb-act" id="notesBtn">\ud83d\udccb Notes</button>
     <button class="tb-act" id="setupBtn">\u2699\ufe0f</button>`;
-  document.getElementById('app').innerHTML=`<div class="station-strip"><span class="num">DEMO ${s.num}</span></div><div class="stage" id="stage"></div>`;
-  buildNotesSheet(s);
+  document.getElementById('app').innerHTML=`
+    <div class="show">
+      <aside class="showside">
+        <div class="lab">Audience \u2014 scan once</div>
+        <div id="qrslot"></div>
+        <div class="joincode">${code}</div>
+        <div class="joinurl" id="ju"></div>
+        <div id="testslot"></div>
+        <div class="joined" id="joinedcount">0 joined</div>
+      </aside>
+      <section class="showmain" id="showmain"></section>
+    </div>
+    <div class="showbar" id="showbar"></div>`;
+  wireJoin(document.querySelector('.showside'), code);   // QR rendered ONCE
   document.getElementById('home').onclick=goHome;
-  document.getElementById('prev').onclick=()=>{ if(i>0)openStation(STATIONS[i-1].id); };
-  document.getElementById('next').onclick=()=>{ if(i<STATIONS.length-1)openStation(STATIONS[i+1].id); };
   document.getElementById('notesBtn').onclick=openNotes;
   document.getElementById('setupBtn').onclick=openSetup;
-  PRESENT[id](document.getElementById('stage'));
+  unsub=LIVE.on('s/'+code, renderShow);
 }
 
-/* shared presenter scaffold: join panel + live panel */
-function presenterShell(stage, liveTitle, extraControls){
-  const code=sess.code;
-  stage.innerHTML=`<div class="pres two">
-    <div class="joinpanel" id="jp">${joinPanelHTML(code)}</div>
-    <div class="livepanel">
-      <div class="livehead"><span class="ttl">${liveTitle}</span></div>
-      <div id="live" style="flex:1;display:flex;flex-direction:column"></div>
-      <div class="ctrlrow">${extraControls||''}</div>
-    </div>
-  </div>`;
-  wireJoin(stage.querySelector('#jp'), code);
-  return stage.querySelector('#live');
+function renderShow(root){
+  const cur=(root&&root.cur!=null)?root.cur:show.cur;
+  show.cur=cur;
+  const jc=document.getElementById('joinedcount'); if(jc){ const n=count(root&&root.joined); jc.innerHTML='<b>'+n+'</b> '+(n===1?'phone':'phones')+' joined'; }
+  // topbar + notes
+  const tt=document.getElementById('showtitle'), ts=document.getElementById('showsub'), nb=document.getElementById('notesBtn');
+  if(cur>=0 && cur<STATIONS.length){ const s=STATIONS[cur]; tt.textContent=s.title; ts.textContent='Demo '+s.num+' of '+STATIONS.length; buildNotesSheet(s); nb.style.opacity=1; nb.style.pointerEvents='auto'; }
+  else { tt.textContent=cur<0?'Lobby':'Session complete'; ts.textContent=cur<0?'Waiting room':'Thank you'; nb.style.opacity=.4; nb.style.pointerEvents='none'; }
+  renderShowMain(cur,root);
+  renderShowBar(cur,root);
+  updateAuto(cur,root);
 }
 
-const PRESENT={};
-
-/* 01 — WOULD YOU CLICK? */
-PRESENT.click=stage=>{
-  const live=presenterShell(stage,'Clicks landing now',
-    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
-  const draw=root=>{
-    const clicks=count(root&&root.click), revealed=root&&root.revealed;
-    live.innerHTML=`<div style="text-align:center;margin:auto 0">
-      <div class="counter">${clicks}</div>
-      <div class="counterlab">${clicks===1?'person':'people'} tapped \u201cclaim\u201d</div>
-      ${revealed?'<div class="verdict r">REVEALED TO EVERYONE</div>':'<div class="subtext">Waiting for the room to take the bait\u2026</div>'}
-    </div>`;
-  };
-  unsub=LIVE.on('s/'+sess.code,draw);
-  stage.querySelector('#reveal').onclick=()=>LIVE.set('s/'+sess.code+'/revealed',true);
-  stage.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.click(stage));
-};
-
-/* 02 — JUST YOUR NUMBER */
-PRESENT.number=stage=>{
-  const texted=!!(CFG.hook||'').trim();
-  const live=presenterShell(stage,texted?'Numbers in \u2014 texts sent instantly':'Numbers coming in',
-    `<button class="btn danger" id="reveal">Reveal on screen</button><button class="btn ghost" id="reset">Reset</button>`);
-  const draw=root=>{
-    const nums=root&&root.numbers?Object.values(root.numbers):[], revealed=root&&root.revealed;
-    if(!nums.length){
-      live.innerHTML=`<div class="empty"><div class="big">\ud83c\udf81</div><div>No one\u2019s claimed yet \u2014 <span class="waitdots">waiting</span></div>${texted?'<div style="font-size:12px;color:var(--faint)">A text is sent the moment someone submits.</div>':''}</div>`;
-    }else{
-      const rows=nums.slice().sort((a,b)=>b.t-a.t).map(n=>`<div class="feedrow"><div class="av">\ud83d\udcf1</div>
-        <div class="main"><div class="a">${esc(maskNum(n.n))}</div><div class="b">${texted?'just got a text from a stranger':'just handed it over to claim a prize'}</div></div>
-        <div class="tag">${texted?'texted':'captured'}</div></div>`).join('');
-      live.innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter" style="font-size:clamp(32px,7vw,52px)">${nums.length}</div><div class="counterlab">numbers given to a stranger</div></div>
-        ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED ON SCREEN</div>':''}
-        <div class="feed">${rows}</div>`;
-    }
-  };
-  unsub=LIVE.on('s/'+sess.code,draw);
-  stage.querySelector('#reveal').onclick=()=>LIVE.set('s/'+sess.code+'/revealed',true);
-  stage.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.number(stage));
-};
-
-/* 03 — THE LOGIN TRAP */
-PRESENT.phish=stage=>{
-  const live=presenterShell(stage,'The operator\u2019s view (everything typed)',
-    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
-  const draw=root=>{
-    const creds=root&&root.creds?Object.values(root.creds):[], revealed=root&&root.revealed;
-    if(!creds.length){
-      live.innerHTML=`<div class="empty"><div class="big">\ud83d\udd13</div><div>Waiting for the first \u201clogin\u201d<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">Tell the room to type fake details.</div></div>`;
-    }else{
-      const rows=creds.slice().sort((a,b)=>b.t-a.t).map(c=>`<div class="feedrow"><div class="av">\ud83d\udc64</div>
-        <div class="main"><div class="a">${esc(c.u||'(blank)')}</div><div class="b">password: ${'\u2022'.repeat(Math.min(c.plen||0,16))||'(empty)'} \u2014 ${c.plen||0} chars</div></div>
-        <div class="tag">stolen</div></div>`).join('');
-      live.innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter scam" style="font-size:clamp(32px,7vw,52px)">${creds.length}</div><div class="counterlab">logins captured</div></div>
-        ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED TO EVERYONE</div>':''}
-        <div class="feed">${rows}</div>`;
-    }
-  };
-  unsub=LIVE.on('s/'+sess.code,draw);
-  stage.querySelector('#reveal').onclick=()=>LIVE.set('s/'+sess.code+'/revealed',true);
-  stage.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.phish(stage));
-};
-
-/* 04 — VOTE THE ROOM */
-PRESENT.vote=stage=>{
-  let roundCache=0;
-  const code=sess.code;
-  stage.innerHTML=`<div class="pres two">
-    <div class="joinpanel" id="jp">${joinPanelHTML(code,'Audience \u2014 scan to vote')}</div>
-    <div class="livepanel">
-      <div class="livehead"><span class="ttl" id="rndlab">Round 1 of ${VOTE_ROUNDS.length}</span></div>
-      <div id="live" style="flex:1"></div>
-      <div class="ctrlrow" id="ctrls"></div>
-    </div>
-  </div>`;
-  wireJoin(stage.querySelector('#jp'), code);
-  const live=stage.querySelector('#live'), ctrls=stage.querySelector('#ctrls'), rndlab=stage.querySelector('#rndlab');
-
-  const draw=root=>{
-    const r=(root&&root.round)||0, revealed=root&&root.revealed, q=VOTE_ROUNDS[r];
-    roundCache=r;
-    rndlab.textContent=`Round ${r+1} of ${VOTE_ROUNDS.length}`;
-    const votes=root&&root.votes&&root.votes['r'+r]?Object.values(root.votes['r'+r]):[];
-    const safe=votes.filter(v=>v==='safe').length, scam=votes.filter(v=>v==='scam').length, tot=safe+scam||1;
-    if(r>=VOTE_ROUNDS.length){
-      live.innerHTML='';
-      return;
-    }
-    live.innerHTML=`<div class="msgcard"><div class="from">${esc(q.from)}</div><div class="bub">${esc(q.text)}</div>
-      ${revealed?`<div class="flags"><div class="from" style="margin:12px 0 4px;color:${q.scam?'var(--scam)':'var(--safe)'}">${q.scam?'\u2717 Scam':'\u2713 Safe'} \u2014 why</div>${q.flags.map(f=>`<div class="flagline">\u2022 ${esc(f)}</div>`).join('')}</div>`:''}</div>
-      <div class="votebars">
-        <div class="vbar safe"><div class="vt"><span>\u2713 Safe</span><span>${safe}</span></div><div class="track"><div class="fillb" style="width:${Math.round(safe/tot*100)}%">${safe?Math.round(safe/tot*100)+'%':''}</div></div></div>
-        <div class="vbar scam"><div class="vt"><span>\u2717 Scam</span><span>${scam}</span></div><div class="track"><div class="fillb" style="width:${Math.round(scam/tot*100)}%">${scam?Math.round(scam/tot*100)+'%':''}</div></div></div>
-      </div>`;
-    // controls
-    if(revealed){
-      const last=r===VOTE_ROUNDS.length-1;
-      ctrls.innerHTML=last?'<button class="btn primary" id="score">See the room score</button><button class="btn ghost" id="reset">Restart</button>'
-                          :'<button class="btn primary" id="vnext">Next round \u2192</button>';
-      const nx=ctrls.querySelector('#vnext'); if(nx) nx.onclick=()=>LIVE.patch('s/'+sess.code,{round:r+1,revealed:false});
-      const sc=ctrls.querySelector('#score'); if(sc) sc.onclick=()=>showScore(root,live,ctrls);
-      const rs=ctrls.querySelector('#reset'); if(rs) rs.onclick=()=>resetRoom(()=>PRESENT.vote(stage));
-    }else{
-      ctrls.innerHTML='<button class="btn danger" id="reveal">Reveal answer</button><button class="btn ghost" id="reset">Reset</button>';
-      ctrls.querySelector('#reveal').onclick=()=>LIVE.set('s/'+sess.code+'/revealed',true);
-      ctrls.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.vote(stage));
-    }
-  };
-  unsub=LIVE.on('s/'+sess.code,draw);
-
-  function showScore(root,live,ctrls){
-    let right=0,total=0;
-    VOTE_ROUNDS.forEach((q,ri)=>{ const vs=root.votes&&root.votes['r'+ri]?Object.values(root.votes['r'+ri]):[];
-      vs.forEach(v=>{ total++; if((v==='scam')===q.scam) right++; }); });
-    const pct=total?Math.round(right/total*100):0;
-    live.innerHTML=`<div style="text-align:center;margin:auto 0"><div class="counter ${pct>=70?'safe':'scam'}">${pct}%</div>
-      <div class="counterlab">of the room\u2019s votes were right</div>
-      <div class="subtext">${right} correct out of ${total} votes cast across ${VOTE_ROUNDS.length} rounds.</div></div>`;
-    ctrls.innerHTML='<button class="btn primary" id="again">Run it again</button>';
-    ctrls.querySelector('#again').onclick=()=>resetRoom(()=>PRESENT.vote(stage));
+function renderShowMain(cur,root){
+  const main=document.getElementById('showmain'); if(!main) return;
+  if(cur<0){
+    const n=count(root&&root.joined);
+    main.innerHTML=`<div class="lobbybox"><div class="big">\ud83d\udc4b</div><h2><b>${n}</b> ${n===1?'phone has':'phones have'} joined</h2>
+      <p class="subtext">When everyone\u2019s in, hit <b>Start demos</b> below. Their phones will follow you through all five \u2014 no re-scanning.</p></div>`;
+    return;
   }
-};
-
-/* 05 — CRACK THE ROOM */
-PRESENT.crack=stage=>{
-  const live=presenterShell(stage,'Live crack-time leaderboard',
-    '<button class="btn ghost" id="reset">Clear board</button>');
-  const draw=root=>{
-    const list=root&&root.pwd?Object.values(root.pwd):[];
-    if(!list.length){
-      live.innerHTML=`<div class="empty"><div class="big">\ud83d\udd10</div><div>Waiting for the first password<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">Remind the room: type a SAMPLE, never a real one.</div></div>`;
-      return;
-    }
-    list.sort((a,b)=>a.sec-b.sec);
-    const rows=list.map((p,i)=>{ const cls=i===0?'weak':(p.sec>3155760000?'strong':''); 
-      return `<div class="brow ${cls}"><div class="rk">${i+1}</div><div class="pw">${esc(p.m||'')}</div><div class="yr">${esc(p.label)}${i===0?' \u2190 weakest':''}</div></div>`; }).join('');
-    live.innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter" style="font-size:clamp(30px,6vw,46px)">${list.length}</div><div class="counterlab">passwords on the board \u00b7 weakest on top</div></div><div class="board">${rows}</div>`;
-  };
-  unsub=LIVE.on('s/'+sess.code,draw);
-  stage.querySelector('#reset').onclick=()=>resetRoom(()=>PRESENT.crack(stage));
-};
-
-/* presenter utilities */
-function fetchRoom(){
-  return new Promise(res=>{
-    let u, settled=false;
-    const cb=d=>{ if(settled) return; settled=true; res(d); setTimeout(()=>{ try{ if(u) u(); }catch(e){} },0); };
-    u=LIVE.on('s/'+sess.code, cb);
-  });
+  if(cur>=STATIONS.length){
+    main.innerHTML=`<div class="lobbybox"><div class="big">\u2705</div><h2>That\u2019s the set \u2014 nicely done</h2>
+      <p class="subtext">Every phone now shows a thank-you. Hit \u21ba below to run it again with the same code.</p></div>`;
+    return;
+  }
+  DSHOW[STATIONS[cur].id](main, root, cur);
 }
-function resetRoom(rebuild){
-  const code=sess.code;
-  LIVE.set('s/'+code,{meta:{demo:sess.demo,ts:Date.now()},phase:'collect',round:0,revealed:false}).then(()=>{
-    clearLive(); rebuild();
-  });
+
+function panel(main,ttl,liveHTML,ctrlsHTML){
+  main.innerHTML=`<div class="livepanel solo"><div class="livehead"><span class="ttl">${ttl}</span></div>
+    <div id="live" style="flex:1;display:flex;flex-direction:column">${liveHTML}</div>
+    <div class="ctrlrow">${ctrlsHTML||''}</div></div>`;
+}
+function demoReset(idx){ LIVE.remove('s/'+show.code+'/d'+idx); }
+
+const DSHOW={};
+
+DSHOW.click=(main,root,idx)=>{
+  const d=root['d'+idx]||{}, clicks=count(d.click), revealed=!!d.revealed;
+  panel(main,'Clicks landing now',
+    `<div style="text-align:center;margin:auto 0"><div class="counter">${clicks}</div>
+      <div class="counterlab">${clicks===1?'person':'people'} tapped \u201cclaim\u201d</div>
+      ${revealed?'<div class="verdict r">REVEALED TO EVERYONE</div>':'<div class="subtext">Waiting for the room to take the bait\u2026</div>'}</div>`,
+    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
+  main.querySelector('#reveal').onclick=()=>LIVE.set('s/'+show.code+'/d'+idx+'/revealed',true);
+  main.querySelector('#reset').onclick=()=>demoReset(idx);
+};
+
+DSHOW.number=(main,root,idx)=>{
+  const texted=!!(CFG.hook||'').trim();
+  const d=root['d'+idx]||{}, nums=d.numbers?Object.values(d.numbers):[], revealed=!!d.revealed;
+  let body;
+  if(!nums.length){
+    body=`<div class="empty"><div class="big">\ud83c\udf81</div><div>No one\u2019s claimed yet \u2014 <span class="waitdots">waiting</span></div>${texted?'<div style="font-size:12px;color:var(--faint)">A text is sent the moment someone submits.</div>':''}</div>`;
+  }else{
+    const rows=nums.slice().sort((a,b)=>b.t-a.t).map(n=>`<div class="feedrow"><div class="av">\ud83d\udcf1</div>
+      <div class="main"><div class="a">${esc(n.n)}</div><div class="b">${texted?'just got a text from a stranger':'just handed it over to claim a prize'}</div></div>
+      <div class="tag">${texted?'texted':'captured'}</div></div>`).join('');
+    body=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter" style="font-size:clamp(32px,7vw,52px)">${nums.length}</div><div class="counterlab">numbers given to a stranger</div></div>
+      ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED ON SCREEN</div>':''}<div class="feed">${rows}</div>`;
+  }
+  panel(main, texted?'Numbers in \u2014 texts sent instantly':'Numbers coming in', body,
+    '<button class="btn danger" id="reveal">Reveal on screen</button><button class="btn ghost" id="reset">Reset</button>');
+  main.querySelector('#reveal').onclick=()=>LIVE.set('s/'+show.code+'/d'+idx+'/revealed',true);
+  main.querySelector('#reset').onclick=()=>demoReset(idx);
+};
+
+DSHOW.phish=(main,root,idx)=>{
+  const d=root['d'+idx]||{}, creds=d.creds?Object.values(d.creds):[], revealed=!!d.revealed;
+  let body;
+  if(!creds.length){
+    body=`<div class="empty"><div class="big">\ud83d\udd13</div><div>Waiting for the first \u201clogin\u201d<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">Tell the room to type fake details.</div></div>`;
+  }else{
+    const rows=creds.slice().sort((a,b)=>b.t-a.t).map(c=>`<div class="feedrow"><div class="av">\ud83d\udc64</div>
+      <div class="main"><div class="a">${esc(c.u||'(blank)')}</div><div class="b">password: <span class="reveal-val">${esc(c.pw||'(empty)')}</span></div></div>
+      <div class="tag">stolen</div></div>`).join('');
+    body=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter scam" style="font-size:clamp(32px,7vw,52px)">${creds.length}</div><div class="counterlab">logins captured</div></div>
+      ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED TO EVERYONE</div>':''}<div class="feed">${rows}</div>`;
+  }
+  panel(main,'The operator\u2019s view (everything typed)', body,
+    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
+  main.querySelector('#reveal').onclick=()=>LIVE.set('s/'+show.code+'/d'+idx+'/revealed',true);
+  main.querySelector('#reset').onclick=()=>demoReset(idx);
+};
+
+DSHOW.vote=(main,root,idx)=>{
+  const base='s/'+show.code+'/d'+idx;
+  const d=root['d'+idx]||{}, r=d.round||0, revealed=!!d.revealed, done=!!d.done, q=VOTE_ROUNDS[r];
+  if(done){
+    let right=0,total=0;
+    VOTE_ROUNDS.forEach((qq,ri)=>{ const vs=d.votes&&d.votes['r'+ri]?Object.values(d.votes['r'+ri]):[]; vs.forEach(v=>{ total++; if((v==='scam')===qq.scam) right++; }); });
+    const pct=total?Math.round(right/total*100):0;
+    panel(main,'The room\u2019s score',
+      `<div style="text-align:center;margin:auto 0"><div class="counter ${pct>=70?'safe':'scam'}">${pct}%</div>
+        <div class="counterlab">of the room\u2019s votes were right</div>
+        <div class="subtext">${right} correct out of ${total} votes across ${VOTE_ROUNDS.length} rounds.</div></div>`,
+      '<button class="btn ghost" id="reset">Run it again</button>');
+    main.querySelector('#reset').onclick=()=>demoReset(idx);
+    return;
+  }
+  const votes=d.votes&&d.votes['r'+r]?Object.values(d.votes['r'+r]):[];
+  const safe=votes.filter(v=>v==='safe').length, scam=votes.filter(v=>v==='scam').length, tot=safe+scam||1;
+  const body=`<div class="msgcard"><div class="from">${esc(q.from)}</div><div class="bub">${esc(q.text)}</div>
+    ${revealed?`<div class="flags"><div class="from" style="margin:12px 0 4px;color:${q.scam?'var(--scam)':'var(--safe)'}">${q.scam?'\u2717 Scam':'\u2713 Safe'} \u2014 why</div>${q.flags.map(f=>`<div class="flagline">\u2022 ${esc(f)}</div>`).join('')}</div>`:''}</div>
+    <div class="votebars">
+      <div class="vbar safe"><div class="vt"><span>\u2713 Safe</span><span>${safe}</span></div><div class="track"><div class="fillb" style="width:${Math.round(safe/tot*100)}%">${safe?Math.round(safe/tot*100)+'%':''}</div></div></div>
+      <div class="vbar scam"><div class="vt"><span>\u2717 Scam</span><span>${scam}</span></div><div class="track"><div class="fillb" style="width:${Math.round(scam/tot*100)}%">${scam?Math.round(scam/tot*100)+'%':''}</div></div></div>
+    </div>`;
+  const last=r===VOTE_ROUNDS.length-1;
+  const ctrls=revealed
+    ? (last?'<button class="btn primary" id="score">See the room score</button><button class="btn ghost" id="reset">Restart</button>'
+           :'<button class="btn primary" id="vnext">Next round \u2192</button>')
+    : '<button class="btn danger" id="reveal">Reveal answer</button><button class="btn ghost" id="reset">Reset</button>';
+  panel(main,'Round '+(r+1)+' of '+VOTE_ROUNDS.length, body, ctrls);
+  const g=s=>main.querySelector(s);
+  if(g('#reveal')) g('#reveal').onclick=()=>LIVE.set(base+'/revealed',true);
+  if(g('#vnext')) g('#vnext').onclick=()=>LIVE.patch(base,{round:r+1,revealed:false});
+  if(g('#score')) g('#score').onclick=()=>LIVE.patch(base,{done:true});
+  if(g('#reset')) g('#reset').onclick=()=>demoReset(idx);
+};
+
+DSHOW.crack=(main,root,idx)=>{
+  const d=root['d'+idx]||{}, list=d.pwd?Object.values(d.pwd):[];
+  let body;
+  if(!list.length){
+    body=`<div class="empty"><div class="big">\ud83d\udd10</div><div>Waiting for the first password<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">Remind the room: type a SAMPLE, never a real one.</div></div>`;
+  }else{
+    list.sort((a,b)=>b.sec-a.sec);                               // STRONGEST first
+    const medals=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];  // 🥇🥈🥉
+    const rows=list.map((p,i)=>{
+      const top=i<3, last=i===list.length-1 && list.length>1;
+      const cls=(i===0?'win':'')+(last?' weak':'');
+      const rank=top?`<span class="medal">${medals[i]}</span>`:`<span class="rk">${i+1}</span>`;
+      const note=i===0?' \u2190 strongest \ud83c\udfc6':(last?' \u2190 weakest':'');
+      return `<div class="brow rankrow ${cls}">${rank}<div class="pw">${esc(p.pw||p.m||'')}</div><div class="yr">${esc(p.label)}${note}</div></div>`; }).join('');
+    body=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter safe" style="font-size:clamp(30px,6vw,46px)">${list.length}</div><div class="counterlab">in the ranking \u00b7 strongest wins \ud83c\udfc6</div></div><div class="board">${rows}</div>`;
+  }
+  panel(main,'Strongest-password ranking', body, '<button class="btn ghost" id="reset">Clear board</button>');
+  main.querySelector('#reset').onclick=()=>demoReset(idx);
+};
+
+DSHOW.otp=(main,root,idx)=>{
+  const d=root['d'+idx]||{}, codes=d.otp?Object.values(d.otp):[], revealed=!!d.revealed;
+  let body;
+  if(!codes.length){
+    body=`<div class="empty"><div class="big">\ud83d\udd22</div><div>Waiting for the first code<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">\u201cConfirm your order \u2014 enter the code we sent.\u201d</div></div>`;
+  }else{
+    const rows=codes.slice().sort((a,b)=>b.t-a.t).map(c=>`<div class="feedrow"><div class="av">\ud83d\udd11</div>
+      <div class="main"><div class="a"><span class="reveal-val">${esc(c.code||'\u2014')}</span></div><div class="b">shared their \u201cverification code\u201d with a stranger</div></div>
+      <div class="tag">handed over</div></div>`).join('');
+    body=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter scam" style="font-size:clamp(32px,7vw,52px)">${codes.length}</div><div class="counterlab">people shared a code with a stranger</div></div>
+      ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED TO EVERYONE</div>':''}<div class="feed">${rows}</div>`;
+  }
+  panel(main,'Codes coming in (never share these!)', body,
+    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
+  main.querySelector('#reveal').onclick=()=>LIVE.set('s/'+show.code+'/d'+idx+'/revealed',true);
+  main.querySelector('#reset').onclick=()=>demoReset(idx);
+};
+
+/* ---- session navigation bar (phones follow `cur`) ---- */
+function gotoCur(n){ clearAuto(); LIVE.set('s/'+show.code+'/cur',n); }
+
+function renderShowBar(cur,root){
+  const bar=document.getElementById('showbar'); if(!bar) return;
+  const dots=['L'].concat(STATIONS.map((s,i)=>i)).map((x,i)=>{
+    const di=i-1; let cls='d'; if(cur>=0&&di<cur)cls+=' done'; if((cur<0&&i===0)||di===cur)cls+=' on'; return `<span class="${cls}"></span>`;
+  }).join('');
+  let left='', right='', mid=`<div class="dots">${dots}</div>`;
+  if(cur<0){
+    left='<span style="font-family:var(--mono);font-size:12px;color:var(--muted)">Lobby</span>';
+    right='<button class="btn primary" id="start">Start demos \u2192</button>';
+  } else if(cur>=STATIONS.length){
+    left='<span style="font-family:var(--mono);font-size:12px;color:var(--safe)">Complete</span>';
+    right='<button class="btn ghost" id="prev">\u2190 Back</button><button class="btn primary" id="restart">\u21ba Run again</button>';
+  } else {
+    const last=cur===STATIONS.length-1;
+    const auto=(autoIdx===cur)?`<span class="advlabel" id="advlabel">auto-advance in ${autoLeft}s</span>`:'';
+    left=`<button class="btn ghost" id="prev">\u2190 Prev</button><button class="toggle ${autoAdvance?'on':''}" id="autotog">auto-advance ${autoAdvance?'on':'off'}</button>`;
+    right=`${auto}<button class="btn ${autoIdx===cur?'primary':'primary'}" id="next">${last?'Finish \u2192':'Next demo \u2192'}</button>`;
+  }
+  bar.innerHTML=`<div class="navbtns">${left}</div>${mid}<div class="navbtns">${right}</div>`;
+  const g=s=>bar.querySelector(s);
+  if(g('#start')) g('#start').onclick=()=>gotoCur(0);
+  if(g('#prev')) g('#prev').onclick=()=>gotoCur(cur<=0?-1:cur-1);
+  if(g('#next')) g('#next').onclick=()=>gotoCur(cur+1);
+  if(g('#restart')) g('#restart').onclick=()=>gotoCur(-1);
+  if(g('#autotog')) g('#autotog').onclick=()=>{ autoAdvance=!autoAdvance; if(!autoAdvance)clearAuto(); renderShowBar(show.cur,root); };
+}
+
+/* ---- gentle auto-advance after a demo's reveal ---- */
+const AUTO_SECS=12;
+let autoAdvance=true, autoTimer=null, autoIdx=null, autoLeft=0;
+function clearAuto(){ if(autoTimer){clearInterval(autoTimer);autoTimer=null;} autoIdx=null; autoLeft=0; }
+function demoComplete(cur,root){
+  if(cur<0||cur>=STATIONS.length-1) return false;   // never auto on the last demo
+  const d=root['d'+cur]||{}, id=STATIONS[cur].id;
+  if(id==='vote') return !!d.done;                   // vote: after the score
+  if(id==='crack') return false;                     // ranking has no reveal
+  return !!d.revealed;                               // click / number / otp / phish: after reveal
+}
+function updateAuto(cur,root){
+  if(!autoAdvance){ clearAuto(); return; }
+  if(demoComplete(cur,root)){
+    if(autoIdx!==cur){ clearAuto(); autoIdx=cur; autoLeft=AUTO_SECS;
+      autoTimer=setInterval(()=>{ autoLeft--; const l=document.getElementById('advlabel'); if(l)l.textContent='auto-advance in '+autoLeft+'s';
+        if(autoLeft<=0){ const n=cur+1; clearAuto(); LIVE.set('s/'+show.code+'/cur',n); } },1000);
+      renderShowBar(cur,root);
+    }
+  } else if(autoIdx!==null){ clearAuto(); renderShowBar(cur,root); }
 }
 
 /* ============================================================
@@ -2945,67 +3066,113 @@ function resetRoom(rebuild){
    ============================================================ */
 function participantApp(code){
   clearLive();
+  document.body.classList.add('participant');
+  closeSheets();
   const root=document.getElementById('root');
-  document.getElementById('scrim').classList.remove('open');
-  let sig=null, submitted=null;            // re-render only when the meaningful state changes
-  const path='s/'+code;
+  let submitted={}, sig=null, curData=null, joined=false, me=pid();
 
   function render(data){
-    if(!data||!data.meta){ root.innerHTML=shellWait(code,'Waiting for the host to start\u2026','This code isn\u2019t live yet. Keep this open \u2014 it\u2019ll wake up automatically.'); return; }
-    const demo=data.meta.demo, revealed=!!data.revealed, round=data.round||0;
-    const me=pid();
-    const localState=submitted||{};
-    const newSig=[demo,revealed,round,JSON.stringify(localState)].join('|');
-    if(newSig===sig) return;       // avoid clobbering inputs / focus
+    if(!data){ if(sig!=='nil'){sig='nil'; root.innerHTML=shellWait(code,'Waiting for the host\u2026','Keep this open \u2014 it\u2019ll start automatically.');} return; }
+    if(!joined){ joined=true; LIVE.set('s/'+code+'/joined/'+me,1); }
+    const c=(data.cur==null?-1:data.cur);
+    if(c<0){ if(sig!=='lobby'){sig='lobby'; root.innerHTML=lobbyPhone(code);} return; }
+    if(c>=STATIONS.length){ if(sig!=='done'){sig='done'; root.innerHTML=thanksPhone();} return; }
+    const station=STATIONS[c], d=data['d'+c]||{};
+    const revealed=!!d.revealed, round=d.round||0, sub=submitted['d'+c]||null;
+    let dyn='';
+    if(station.id==='crack' && sub && sub.done){ dyn='|'+(d.pwd?Object.keys(d.pwd).length:0); }   // live rank updates
+    const newSig=[c,revealed,round,JSON.stringify(sub)].join('|')+dyn;
+    if(newSig===sig) return;
     sig=newSig;
-    PVIEW[demo](root,{code,data,demo,revealed,round,me,submitted,setSubmitted:v=>{submitted=v;sig=null;render(curData);}});
+    PVIEW[station.id](root,{ code, data, d, demo:station.id, idx:c, revealed, round, me,
+      submitted:sub,
+      p:s=>'s/'+code+'/d'+c+'/'+s,
+      setSubmitted:v=>{ submitted['d'+c]=v; sig=null; render(curData); } });
   }
-  let curData=null;
-  unsub=LIVE.on(path,d=>{ curData=d; render(d); });
+  unsub=LIVE.on('s/'+code, d=>{ curData=d; render(d); });
 }
 
 function shellHead(){ return `<div class="pv-head"><span class="lk">\ud83d\udd12</span><span>Digital Safety \u00b7 live session</span></div>`; }
 function shellWait(code,title,sub){
   return `<div class="pv">${shellHead()}<div class="pv-wait"><div class="spinner"></div><h2>${esc(title)}</h2><p style="max-width:30ch">${esc(sub)}</p><div class="pv-note">session ${esc(code)}</div></div></div>`;
 }
+function lobbyPhone(code){
+  return `<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>You\u2019re in!</h2>
+    <p>\ud83d\udc40 Keep this open and watch the big screen \u2014 it\u2019ll guide your phone through everything. No need to scan again.</p>
+    <div class="pv-note">session ${esc(code)}</div></div></div>`;
+}
+function thanksPhone(){
+  return `<div class="pv">${shellHead()}<div class="pv-reveal" style="background:linear-gradient(180deg,#0f2c24,#08130f)">
+    <div class="ic">\u2705</div><h1 class="g">Thank you!</h1><div class="big2">That\u2019s the end of the session.</div>
+    <p>Six quick lessons in how easily a scam works. <b>Stop \u00b7 Think \u00b7 Verify</b> \u2014 and never act on a link, prize, or OTP you didn\u2019t ask for.</p></div></div>`;
+}
 
 const PVIEW={};
 
 /* 01 click */
 PVIEW.click=(root,ctx)=>{
-  if(ctx.revealed){ root.innerHTML=beware(); return; }
+  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Beware!','That \u201cdeal\u201d was the bait.','You just opened a stranger\u2019s shopping link \u2014 in a room about scams. A real one could install malware or steal your login. <b>Too-good-to-be-true prices are the hook. Stop \u00b7 Think \u00b7 Verify.</b>'); return; }
   if(ctx.submitted&&ctx.submitted.done){
-    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>You\u2019re in!</h2><p>Hang on \u2014 look up at the big screen.</p></div></div>`;
-    return;
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Opening the deal\u2026</h2><p>Hang on \u2014 look up at the big screen.</p></div></div>`; return;
   }
-  root.innerHTML=`<div class="pv-bait"><div class="gift">\ud83c\udf81</div><h1>You\u2019ve won a reward!</h1><p>A \u20b91,000 voucher is waiting for you.</p><p style="font-size:13px">Tap below to verify and claim instantly.</p>
-    <button class="pv-btn bait" id="claim">Verify &amp; claim now</button></div>`;
-  root.querySelector('#claim').onclick=()=>{
-    LIVE.set('s/'+ctx.code+'/click/'+ctx.me,{t:Date.now()});
-    ctx.setSubmitted({done:true});
-  };
+  root.innerHTML=`<div class="pv"><div class="pv-shop">
+    <div class="shopbar"><span class="shoplogo">\ud83d\uded2 ShopKart</span><span class="shopflash">\u26a1 FLASH SALE</span></div>
+    <div class="shopimg">\ud83c\udfa7</div>
+    <div class="shopbody">
+      <div class="shopname">Wireless Earbuds Pro</div>
+      <div class="shopprice"><span class="now">\u20b9499</span><span class="was">\u20b94,999</span><span class="off">90% OFF</span></div>
+      <div class="shopstock">\ud83d\udd25 Only 3 left \u00b7 sale ends in 04:59</div>
+      <button class="pv-btn shop" id="claim">Grab this deal \u2192</button>
+    </div></div></div>`;
+  root.querySelector('#claim').onclick=()=>{ LIVE.set(ctx.p('click/'+ctx.me),{t:Date.now()}); ctx.setSubmitted({done:true}); };
 };
 
 /* 02 number */
 PVIEW.number=(root,ctx)=>{
-  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Gotcha.','That number is gone.','You just gave your phone number to a stranger because a screen promised a prize. <b>That\u2019s all a scammer needs to start.</b> Never hand your number to claim something you didn\u2019t enter.'); return; }
+  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Gotcha.','That number is gone.','You handed your phone number to a stranger for a \u201cdiscount.\u201d <b>That\u2019s all a scammer needs to start.</b> Real shops don\u2019t need your number to show you a price.'); return; }
   if(ctx.submitted&&ctx.submitted.done){
     const texted=!!(CFG.hook||'').trim();
-    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Registered!</h2><p>${texted?'\ud83d\udc40 Check your text messages\u2026':'Your entry is in. Watch the big screen.'}</p></div></div>`;
-    return;
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Coupon unlocked!</h2><p>${texted?'\ud83d\udc40 Check your text messages\u2026':'Done \u2014 watch the big screen.'}</p></div></div>`; return;
   }
-  root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-body">
-    <h2>\ud83c\udf89 Claim your \u20b92,000 voucher</h2><p class="sub">Limited offer \u2014 just register your mobile number and we\u2019ll text you the voucher right away.</p>
-    <div class="pv-flabel">Mobile number</div>
-    <input class="pv-field" id="num" inputmode="tel" placeholder="9876543210" autocomplete="off">
-    <button class="pv-btn go" id="go">Claim my voucher</button>
-    <div class="pv-note">By tapping you\u2019ll see why this was a test \u2014 nothing is charged.</div>
-  </div></div>`;
+  root.innerHTML=`<div class="pv"><div class="pv-shop">
+    <div class="shopbar"><span class="shoplogo">\ud83d\uded2 ShopKart</span><span class="shopflash" style="background:var(--safe);color:#06231a">\ud83c\udf81 OFFER</span></div>
+    <div class="shopbody" style="padding-top:24px">
+      <div class="shopname" style="font-size:22px">Get \u20b9500 OFF your first order</div>
+      <p class="sub">Enter your mobile number and we\u2019ll <b>SMS your coupon code</b> instantly. Limited to today only.</p>
+      <div class="pv-flabel">Mobile number</div>
+      <input class="pv-field" id="num" inputmode="tel" placeholder="9876543210" autocomplete="off">
+      <button class="pv-btn shop" id="go" style="background:var(--safe);color:#06231a">Unlock my coupon</button>
+      <div class="pv-note">By tapping you\u2019ll see why this was a test \u2014 nothing is charged.</div>
+    </div></div></div>`;
   const inp=root.querySelector('#num');
   root.querySelector('#go').onclick=()=>{
     const v=inp.value.trim(); if(v.replace(/\D/g,'').length<6){ inp.style.borderColor='var(--scam)'; inp.focus(); return; }
-    LIVE.set('s/'+ctx.code+'/numbers/'+ctx.me,{n:v,t:Date.now()});
-    sendHook(v, SMS_MSG);            // text goes out the moment they submit
+    LIVE.set(ctx.p('numbers/'+ctx.me),{n:v,t:Date.now()});
+    sendHook(v, SMS_MSG);
+    ctx.setSubmitted({done:true});
+  };
+};
+
+/* 03 otp \u2014 share the code */
+PVIEW.otp=(root,ctx)=>{
+  if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Never share a code.','You just gave your OTP to a stranger.','That 6-digit code is the key to your account or your payment. <b>Banks, shops and \u201cdelivery agents\u201d never need it.</b> Anyone who asks for your OTP \u2014 by call, SMS or screen \u2014 is the scammer.'); return; }
+  if(ctx.submitted&&ctx.submitted.done){
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Confirming\u2026</h2><p>Please wait \u2014 look at the big screen.</p></div></div>`; return;
+  }
+  root.innerHTML=`<div class="pv"><div class="pv-shop">
+    <div class="shopbar"><span class="shoplogo">\ud83d\uded2 ShopKart</span><span class="shopflash" style="background:#1b66c9;color:#fff">CHECKOUT</span></div>
+    <div class="shopbody" style="padding-top:24px">
+      <div class="shopname" style="font-size:22px">Confirm your order</div>
+      <p class="sub">We sent a <b>6-digit code</b> to your phone. Enter it to confirm payment of <b>\u20b9499</b> and complete your order.</p>
+      <div class="pv-flabel">Verification code</div>
+      <input class="pv-field" id="otp" inputmode="numeric" maxlength="6" placeholder="\u2022 \u2022 \u2022 \u2022 \u2022 \u2022" autocomplete="off" style="letter-spacing:.4em;text-align:center;font-size:22px">
+      <button class="pv-btn shop" id="go" style="background:#1b66c9;color:#fff">Confirm &amp; pay</button>
+      <div class="pv-note">Type any 6 digits \u2014 you\u2019ll see why this was a test.</div>
+    </div></div></div>`;
+  const inp=root.querySelector('#otp');
+  root.querySelector('#go').onclick=()=>{
+    const v=inp.value.replace(/\D/g,'').slice(0,6); if(v.length<4){ inp.style.borderColor='var(--scam)'; inp.focus(); return; }
+    LIVE.set(ctx.p('otp/'+ctx.me),{code:v,t:Date.now()});
     ctx.setSubmitted({done:true});
   };
 };
@@ -3014,8 +3181,7 @@ PVIEW.number=(root,ctx)=>{
 PVIEW.phish=(root,ctx)=>{
   if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Phished.','Everything you typed is on the screen.','You typed your details into a page that only looked real \u2014 and a stranger captured them live. <b>A page that imitates your bank is not your bank.</b> Check the address, and never log in from a link.'); return; }
   if(ctx.submitted&&ctx.submitted.done){
-    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Signing you in\u2026</h2><p>Please wait. (Look at the big screen.)</p></div></div>`;
-    return;
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>Signing you in\u2026</h2><p>Please wait. (Look at the big screen.)</p></div></div>`; return;
   }
   root.innerHTML=`<div class="pv" style="background:#0b1320">${shellHead()}<div class="pv-body">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px"><div style="width:34px;height:34px;border-radius:9px;background:#1b66c9;display:grid;place-items:center;color:#fff;font-weight:800">S</div><b style="font-size:18px">SecureBank</b></div>
@@ -3027,7 +3193,7 @@ PVIEW.phish=(root,ctx)=>{
   </div></div>`;
   root.querySelector('#go').onclick=()=>{
     const u=root.querySelector('#u').value.trim(), p=root.querySelector('#p').value;
-    LIVE.set('s/'+ctx.code+'/creds/'+ctx.me,{u:u.slice(0,40),plen:p.length,t:Date.now()});
+    LIVE.set(ctx.p('creds/'+ctx.me),{u:u.slice(0,60),pw:p.slice(0,64),plen:p.length,t:Date.now()});
     ctx.setSubmitted({done:true});
   };
 };
@@ -3035,15 +3201,15 @@ PVIEW.phish=(root,ctx)=>{
 /* 04 vote */
 PVIEW.vote=(root,ctx)=>{
   const r=ctx.round, q=VOTE_ROUNDS[r];
-  if(r>=VOTE_ROUNDS.length || !q){ root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>That\u2019s a wrap!</h2><p>Look at the big screen for the room\u2019s score.</p></div></div>`; return; }
+  if(ctx.d&&ctx.d.done){ root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>That\u2019s a wrap!</h2><p>Look at the big screen for the room\u2019s score.</p></div></div>`; return; }
+  if(!q){ root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-wait"><div class="chk">\u2713</div><h2>That\u2019s a wrap!</h2><p>Look at the big screen.</p></div></div>`; return; }
   const myVote=ctx.submitted&&ctx.submitted['r'+r];
   if(ctx.revealed){
     const right=(myVote==='scam')===q.scam;
     root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-reveal"><div class="ic">${q.scam?'\u26a0\ufe0f':'\u2705'}</div>
       <h1 class="${q.scam?'r':'g'}">${q.scam?'Scam':'Safe'}</h1>
       ${myVote?`<div class="big2" style="color:${right?'var(--safe)':'var(--scam)'}">You voted ${myVote==='scam'?'Scam':'Safe'} \u2014 ${right?'correct \u2713':'look again'}</div>`:'<div class="big2">No vote recorded</div>'}
-      <p>${esc(q.flags[0])}</p><div class="pv-note">Next round coming up on the screen\u2026</div></div></div>`;
-    return;
+      <p>${esc(q.flags[0])}</p><div class="pv-note">Next up on the screen\u2026</div></div></div>`; return;
   }
   root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-body">
     <div class="pv-flabel">Round ${r+1} of ${VOTE_ROUNDS.length} \u00b7 from ${esc(q.from)}</div>
@@ -3054,34 +3220,46 @@ PVIEW.vote=(root,ctx)=>{
       <button class="scam ${myVote==='scam'?'on':''}" data-v="scam">\u2717 Scam</button>
     </div></div></div>`;
   root.querySelectorAll('.pv-vote button').forEach(b=>b.onclick=()=>{
-    LIVE.set('s/'+ctx.code+'/votes/r'+r+'/'+ctx.me,b.dataset.v);
+    LIVE.set(ctx.p('votes/r'+r+'/'+ctx.me), b.dataset.v);
     const s=Object.assign({},ctx.submitted); s['r'+r]=b.dataset.v; ctx.setSubmitted(s);
   });
 };
 
-/* 05 crack */
+/* 06 crack — strongest-password ranking */
 PVIEW.crack=(root,ctx)=>{
+  if(ctx.submitted&&ctx.submitted.done){
+    const list=ctx.d&&ctx.d.pwd?Object.values(ctx.d.pwd):[];
+    list.sort((a,b)=>b.sec-a.sec);
+    const mine=(ctx.d&&ctx.d.pwd&&ctx.d.pwd[ctx.me])||{sec:ctx.submitted.sec,label:ctx.submitted.label};
+    let rank=list.findIndex(x=>x===ctx.d.pwd[ctx.me]); if(rank<0){ rank=list.filter(x=>x.sec>(mine.sec||0)).length; }
+    const pos=rank+1, n=Math.max(list.length,1), first=pos===1;
+    root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-reveal" style="background:linear-gradient(180deg,${first?'#10271f,#08130f':'#13242e,#080f14'})">
+      <div class="ic">${first?'\ud83c\udfc6':'\ud83d\udd10'}</div>
+      <div class="rankbig ${first?'g':''}">#${pos}<span class="ranktot"> / ${n}</span></div>
+      <div class="big2">${first?'Strongest in the room \u2014 for now!':'You\u2019re on the ranking'}</div>
+      <p>Your password would take <b>${esc(mine.label||'\u2014')}</b> to crack. Think you can top the leaderboard? Longer beats everything.</p>
+      <button class="pv-btn go" id="again" style="max-width:280px">Try a stronger one</button></div></div>`;
+    root.querySelector('#again').onclick=()=>ctx.setSubmitted(null);
+    return;
+  }
   root.innerHTML=`<div class="pv">${shellHead()}<div class="pv-body">
-    <h2>How strong is it?</h2><p class="sub">Type a <b>sample</b> password (never a real one) and watch how long it survives an attack.</p>
+    <h2>\ud83c\udfc6 Strongest password wins</h2><p class="sub">Type a <b>sample</b> password (never a real one) and climb the live ranking on the big screen.</p>
     <input class="pv-field" id="pw" autocomplete="off" placeholder="type here\u2026">
     <div class="pv-meter"><div class="f" id="mf"></div></div>
     <div class="pv-crack" id="ct">\u2014</div><div class="pv-cracklab">time to crack</div>
-    <button class="pv-btn go" id="go">Put it on the board</button>
-    <div class="pv-note" id="note">Only a masked hint reaches the screen \u2014 never your password.</div>
+    <button class="pv-btn go" id="go">Enter the ranking</button>
+    <div class="pv-note" id="note">What you type appears on the big screen \u2014 use a <b>sample</b>, never a real password.</div>
   </div></div>`;
   const inp=root.querySelector('#pw'), mf=root.querySelector('#mf'), ct=root.querySelector('#ct');
-  const upd=()=>{ const v=inp.value, c=crack(v);
-    ct.textContent=v?c.label:'\u2014';
-    const score=v?Math.min(Math.log10(c.sec+1)/12,1):0;
-    mf.style.width=(score*100)+'%';
-    mf.style.background=score<.25?'var(--scam)':score<.6?'var(--beacon)':'var(--safe)';
-  };
+  const upd=()=>{ const v=inp.value, c=crack(v); ct.textContent=v?c.label:'\u2014';
+    const score=v?Math.min(Math.log10(c.sec+1)/12,1):0; mf.style.width=(score*100)+'%';
+    mf.style.background=score<.25?'var(--scam)':score<.6?'var(--beacon)':'var(--safe)'; };
   inp.oninput=upd; upd();
   root.querySelector('#go').onclick=()=>{
-    const v=inp.value; if(!v) { inp.focus(); return; }
+    const v=inp.value; if(!v){ inp.focus(); return; }
     const c=crack(v);
-    LIVE.set('s/'+ctx.code+'/pwd/'+ctx.me,{m:maskPw(v),label:c.label,sec:c.sec,t:Date.now()});
-    root.querySelector('#note').innerHTML='<b style="color:var(--safe)">On the board!</b> Try a longer passphrase and add it again to watch it climb.';
+    LIVE.set(ctx.p('pwd/'+ctx.me),{pw:v.slice(0,64),m:maskPw(v),label:c.label,sec:c.sec,t:Date.now()});
+    ctx.setSubmitted({done:true,sec:c.sec,label:c.label});
   };
 };
 
@@ -3089,9 +3267,8 @@ PVIEW.crack=(root,ctx)=>{
 function beware(ic,title,big,body){
   ic=ic||'\u26a0\ufe0f'; title=title||'Beware!'; big=big||'It\u2019s a scam.';
   body=body||'You just opened a stranger\u2019s link \u2014 in a room about scams. A real one could have stolen your login or your money. <b>Stop \u00b7 Think \u00b7 Verify.</b>';
-  return `<div class="pv"><div class="pv-reveal" style="background:linear-gradient(180deg,#2a0d08,#160606);min-height:100dvh">
-    <div class="ic">${ic}</div><h1 class="r">${esc(title)}</h1><div class="big2">${esc(big)}</div>
-    <p>${body}</p></div></div>`;
+  return `<div class="pv"><div class="pv-reveal" style="background:linear-gradient(180deg,#2a0d08,#160606)">
+    <div class="ic">${ic}</div><h1 class="r">${esc(title)}</h1><div class="big2">${esc(big)}</div><p>${body}</p></div></div>`;
 }
 
 /* ============================================================

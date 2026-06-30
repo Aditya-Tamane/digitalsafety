@@ -266,6 +266,27 @@
   .rankbig.g{color:var(--safe)}
   .rankbig .ranktot{font-size:24px;color:var(--faint);font-weight:700}
 
+  /* ---------- messaging-style photo trap (participant) ---------- */
+  .pv-chat{flex:1;display:flex;flex-direction:column;min-height:0;background:#0b141a}
+  .chat-head{display:flex;align-items:center;gap:10px;padding:14px 14px;background:#12463a;color:#eafff6}
+  .chat-head .back{font-size:22px;opacity:.8}
+  .chat-head .ava{width:34px;height:34px;border-radius:50%;background:#1f6b56;display:grid;place-items:center;font-weight:800;color:#cfeee2}
+  .chat-head .who{display:flex;flex-direction:column;line-height:1.2}
+  .chat-head .who b{font-size:15px}
+  .chat-head .who span{font-size:11px;opacity:.75}
+  .chat-body{flex:1;padding:18px 14px;display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,#0d1820,#0b141a);overflow-y:auto}
+  .cbub{max-width:84%;border-radius:14px;padding:8px 8px 6px;font-size:14px}
+  .cbub.in{align-self:flex-start;background:#152732;border-top-left-radius:5px}
+  .cphoto{width:210px;max-width:62vw;background:#0a141a;border-radius:10px;overflow:hidden}
+  .cphoto-blur{height:150px;display:grid;place-items:center;font-size:54px;filter:blur(2px);background:repeating-linear-gradient(135deg,#243b48,#243b48 12px,#1c2e38 12px,#1c2e38 24px)}
+  .cphoto-name{font-size:11px;color:var(--muted);padding:7px 9px;font-family:var(--mono)}
+  .cdl{width:100%;border:none;background:#1f6b56;color:#eafff6;font-weight:700;font-size:14px;padding:11px;cursor:pointer}
+  .cdl[disabled]{opacity:.7}
+  .ctext{padding:7px 6px 0;color:var(--text)}
+  .ctime{text-align:right;font-size:10px;color:var(--faint);padding:2px 6px 0}
+  .chat-foot{padding:10px 14px;background:#10161d;border-top:1px solid var(--line-soft)}
+  .chat-input{background:#0a141a;border:1px solid var(--line-soft);border-radius:999px;padding:10px 16px;color:var(--faint);font-size:14px}
+
   .spinner{width:38px;height:38px;border:3px solid #ffffff20;border-top-color:var(--beacon);border-radius:50%;animation:spin .8s linear infinite;margin:auto}
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes blink{50%{opacity:.35}}
@@ -2702,6 +2723,7 @@ async function sendHook(to,text){
   catch(e){ return false; }
 }
 const SMS_MSG='\u26a0\ufe0f Gotcha! That was a digital-safety demo. You just gave your number to a stranger who promised a "prize". A real scammer would now have it. Stop \u00b7 Think \u00b7 Verify.';
+const DEBIT_MSG='\u26a0\ufe0f ALERT: INR 4,999 debited from a/c XX4821 for an online purchase. \u2014 (Digital Safety demo) You just \u201cdownloaded\u201d a photo from an unknown number. In a real scam this loss could be real. Never open media or links from unknown senders.';
 
 /* ============================================================
    ROUTER  — phones that opened a join link see the participant
@@ -2738,25 +2760,31 @@ const STATIONS=[
    freeze:"You handed your number to a stranger because a shop screen dangled a discount \u2014 and seconds later they texted you. That number is all a scammer needs to start.",
    safety:"Internal use \u2014 full numbers are shown on your screen and wiped on reset. A real SMS only sends if YOU connect a messaging service (config.js \u2192 hook)."},
 
-  {id:"otp", num:"03", title:"Share the Code",
+  {id:"photo", num:"03", title:"The Photo Trap",
+   goal:"A \u201cphoto\u201d arrives on every registered phone like a message from an unknown number. The instant someone taps <b>Download</b>, a real \u201cmoney debited\u201d text hits their phone \u2014 and they appear on your screen as \u2018charged\u2019.",
+   steps:[{t:"Phones show a photo from an unknown number."},{t:"People tap Download out of curiosity."},{t:"A \u2018debited\u2019 SMS lands on their phone instantly."},{t:"Reveal: never open media from unknown senders."}],
+   freeze:"You didn\u2019t buy anything \u2014 you just opened a photo from a number you don\u2019t know, and \u2018lost\u2019 money. A tap can be all it takes. Never download media or tap links from unknown senders.",
+   safety:"Internal use \u2014 the \u2018debit\u2019 SMS is a clearly-marked demo message; no money moves. It reuses the number people registered in \u201cJust Your Number\u201d, and reveals on the phone immediately."},
+
+  {id:"otp", num:"04", title:"Share the Code",
    goal:"The checkout asks people for \u201cthe 6-digit code we just sent\u201d to confirm their order. Watch the room hand over OTPs to a stranger \u2014 live \u2014 then reveal that an OTP is the one thing you never share.",
    steps:[{t:"Show the \u201cconfirm your order\u201d join code."},{t:"People type any code to \u2018verify\u2019."},{t:"Codes stream onto the screen as they\u2019re shared."},{t:"Reveal: never share an OTP \u2014 with anyone, ever."}],
    freeze:"An OTP is a key to your account or your money. Banks, shops and delivery agents never need it \u2014 anyone who asks for the code is the scammer. Never read it out, never type it into a link.",
    safety:"Internal use \u2014 the codes typed are shown on your screen and wiped on reset. They\u2019re not real OTPs; it\u2019s a simulation."},
 
-  {id:"phish", num:"04", title:"The Login Trap",
+  {id:"phish", num:"05", title:"The Login Trap",
    goal:"A convincing \u201cverify your account\u201d page opens on every phone. As people type, their entries appear on your screen in real time \u2014 the exact view a phishing site\u2019s operator gets.",
    steps:[{t:"Tell the room: type a FAKE name + password."},{t:"Show the join code; they open the \u2018login\u2019."},{t:"Watch entries land on screen as they type."},{t:"Reveal: everything they typed was captured."}],
    freeze:"A page that looks like your bank is not your bank. The moment you type into it, a stranger has it \u2014 you watched it happen on this screen.",
    safety:"Internal use \u2014 everything typed is shown in full on your screen. Ask people to type FAKE details so no real credential ends up on the projector."},
 
-  {id:"vote", num:"05", title:"Vote the Room",
+  {id:"vote", num:"06", title:"Vote the Room",
    goal:"Show a real-looking message; the whole room votes Safe or Scam from their phones. The bar moves live, then you reveal the answer and the red flags. Five rounds, one room score.",
    steps:[{t:"Read each message on the screen aloud."},{t:"Everyone votes Safe / Scam on their phone."},{t:"Reveal the answer and the red flags."},{t:"Next round; end on the room\u2019s score."}],
    freeze:"Scams almost always pair pressure with a link or a payment. Genuine messages rarely do both \u2014 that single test catches most of them.",
    safety:"Illustrative messages only; none of the links are real."},
 
-  {id:"crack", num:"06", title:"Crack the Room",
+  {id:"crack", num:"07", title:"Crack the Room",
    goal:"Everyone types a sample password on their phone and it climbs a live ranking \u2014 the <b>strongest</b> password takes 1st place. A fun, competitive finish that shows what \u2018strong\u2019 really means.",
    steps:[{t:"Ask everyone to type a SAMPLE password (never a real one)."},{t:"Crack-times rank them \u2014 strongest at the top."},{t:"Crown the leader; show the weakest cracked instantly."},{t:"Challenge them: a long passphrase beats everything."}],
    freeze:"Length beats complexity, and reuse is the real danger \u2014 one breach unlocks every account that shared that password. Long, unique, and a password manager.",
@@ -2794,7 +2822,7 @@ function goHome(){
     <section class="hero">
       <div class="kick">Live audience console</div>
       <h1>Scam the room, <span class="g">safely.</span></h1>
-      <p>One session, one QR. The whole audience joins once from their phones, then every phone follows along automatically as you move through all six demos \u2014 clicks, numbers, votes and passwords landing on your screen live.</p>
+      <p>One session, one QR. The whole audience joins once from their phones, then every phone follows along automatically as you move through all seven demos \u2014 clicks, numbers, votes and passwords landing on your screen live.</p>
       <div class="howto">
         <div class="pill"><span class="s">1</span><span>Start a session \u2014 <b>one QR</b> appears</span></div>
         <div class="pill"><span class="s">2</span><span>The room <b>scans once</b></span></div>
@@ -3009,6 +3037,24 @@ DSHOW.otp=(main,root,idx)=>{
   main.querySelector('#reset').onclick=()=>demoReset(idx);
 };
 
+DSHOW.photo=(main,root,idx)=>{
+  const d=root['d'+idx]||{}, taps=d.tapped?Object.values(d.tapped):[], revealed=!!d.revealed;
+  let body;
+  if(!taps.length){
+    body=`<div class="empty"><div class="big">\ud83d\uddbc\ufe0f</div><div>A photo just \u201carrived\u201d on every phone<span class="waitdots"></span></div><div style="font-size:12px;color:var(--faint)">Waiting for someone to tap Download\u2026</div></div>`;
+  }else{
+    const rows=taps.slice().sort((a,b)=>b.t-a.t).map(p=>`<div class="feedrow"><div class="av">\ud83d\udcb8</div>
+      <div class="main"><div class="a">${esc(p.n||'a phone')}</div><div class="b">downloaded the photo \u2014 \u201c\u20b94,999 debited\u201d${p.sms?' \u00b7 SMS sent':''}</div></div>
+      <div class="tag">charged</div></div>`).join('');
+    body=`<div style="display:flex;align-items:baseline;gap:10px"><div class="counter scam" style="font-size:clamp(32px,7vw,52px)">${taps.length}</div><div class="counterlab">downloaded the photo &amp; got \u2018charged\u2019</div></div>
+      ${revealed?'<div class="verdict r" style="margin:6px 0 0">REVEALED TO EVERYONE</div>':''}<div class="feed">${rows}</div>`;
+  }
+  panel(main,'The \u201cphoto\u201d \u2014 who tapped Download', body,
+    '<button class="btn danger" id="reveal">Reveal to all phones</button><button class="btn ghost" id="reset">Reset</button>');
+  main.querySelector('#reveal').onclick=()=>LIVE.set('s/'+show.code+'/d'+idx+'/revealed',true);
+  main.querySelector('#reset').onclick=()=>demoReset(idx);
+};
+
 /* ---- session navigation bar (phones follow `cur`) ---- */
 function gotoCur(n){ clearAuto(); LIVE.set('s/'+show.code+'/cur',n); }
 
@@ -3104,7 +3150,7 @@ function lobbyPhone(code){
 function thanksPhone(){
   return `<div class="pv">${shellHead()}<div class="pv-reveal" style="background:linear-gradient(180deg,#0f2c24,#08130f)">
     <div class="ic">\u2705</div><h1 class="g">Thank you!</h1><div class="big2">That\u2019s the end of the session.</div>
-    <p>Six quick lessons in how easily a scam works. <b>Stop \u00b7 Think \u00b7 Verify</b> \u2014 and never act on a link, prize, or OTP you didn\u2019t ask for.</p></div></div>`;
+    <p>Seven quick lessons in how easily a scam works. <b>Stop \u00b7 Think \u00b7 Verify</b> \u2014 and never act on a link, prize, or OTP you didn\u2019t ask for.</p></div></div>`;
 }
 
 const PVIEW={};
@@ -3177,7 +3223,39 @@ PVIEW.otp=(root,ctx)=>{
   };
 };
 
-/* 03 phish */
+/* 03 photo — the WhatsApp-style photo trap */
+PVIEW.photo=(root,ctx)=>{
+  const myNum=(()=>{ const ni=STATIONS.findIndex(s=>s.id==='number'); const e=ctx.data&&ctx.data['d'+ni]&&ctx.data['d'+ni].numbers&&ctx.data['d'+ni].numbers[ctx.me]; return e&&e.n; })();
+  if(ctx.submitted&&ctx.submitted.done){
+    const texted=!!(CFG.hook||'').trim() && !!myNum;
+    root.innerHTML=`<div class="pv"><div class="pv-reveal" style="background:linear-gradient(180deg,#2a0d08,#160606)">
+      <div class="ic">\ud83d\udcb8</div><h1 class="r">\u20b94,999 \u201cdebited\u201d</h1>
+      <div class="big2">You only opened a photo.</div>
+      <p>You didn\u2019t buy anything \u2014 you tapped a photo from a number you don\u2019t know, and \u201clost\u201d money. <b>A single tap can be the trap.</b> Never download media or tap links from unknown senders.${texted?' (Check the \u201cdebit\u201d text on your phone.)':''}</p></div></div>`;
+    return;
+  }
+  if(ctx.revealed){ root.innerHTML=beware('\ud83d\uddbc\ufe0f','Don\u2019t tap that photo.','Others just \u201clost\u201d money.','People who tapped Download on a photo from an unknown number got a \u201cmoney debited\u201d alert. <b>Opening media from strangers can install malware or trigger fraud.</b> If you don\u2019t know the sender, don\u2019t download it.'); return; }
+  root.innerHTML=`<div class="pv"><div class="pv-chat">
+    <div class="chat-head"><span class="back">\u2039</span><span class="ava">?</span><div class="who"><b>+91 98765 43210</b><span>online</span></div></div>
+    <div class="chat-body">
+      <div class="cbub in">
+        <div class="cphoto"><div class="cphoto-blur">\ud83d\uddbc\ufe0f</div><div class="cphoto-name">IMG_2043.jpg \u00b7 248 KB</div>
+          <button class="cdl" id="dl">\u2b07 Download</button></div>
+        <div class="ctext">Is this you?? \ud83d\ude2e someone sent me this</div>
+        <div class="ctime">now</div>
+      </div>
+    </div>
+    <div class="chat-foot"><div class="chat-input">Message</div></div>
+  </div></div>`;
+  root.querySelector('#dl').onclick=()=>{
+    const dl=root.querySelector('#dl'); dl.textContent='Downloading\u2026'; dl.disabled=true;
+    LIVE.set(ctx.p('tapped/'+ctx.me),{n:myNum||'a phone',sms:!!(CFG.hook&&myNum),t:Date.now()});
+    if(myNum) sendHook(myNum, DEBIT_MSG);
+    setTimeout(()=>ctx.setSubmitted({done:true}), 700);
+  };
+};
+
+/* 05 phish */
 PVIEW.phish=(root,ctx)=>{
   if(ctx.revealed){ root.innerHTML=beware('\u26a0\ufe0f','Phished.','Everything you typed is on the screen.','You typed your details into a page that only looked real \u2014 and a stranger captured them live. <b>A page that imitates your bank is not your bank.</b> Check the address, and never log in from a link.'); return; }
   if(ctx.submitted&&ctx.submitted.done){
